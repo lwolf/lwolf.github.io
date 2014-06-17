@@ -2,10 +2,10 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://lwolf.github.io
+url: http://blog.lwolf.org
 title: My Octopress Blog
 subtitle: A blogging framework for hackers.
-author: Your Name
+author: Sergey Nuzhdin
 simple_search: https://www.google.com/search
 description:
 
@@ -33,6 +33,12 @@ destination: public
 plugins: plugins
 code_dir: downloads/code
 category_dir: blog/categories
+markdown: kramdown
+kramdown:
+  use_coderay: true
+  coderay:
+    coderay_line_numbers: nil
+    coderay_css: class
 markdown: rdiscount
 rdiscount:
   extensions:
@@ -63,8 +69,8 @@ default_asides: [asides/recent_posts.html, asides/github.html, asides/delicious.
 # ----------------------- #
 
 # Github repositories
-github_user:
-github_repo_count: 0
+github_user: lwolf
+github_repo_count: 4
 github_show_profile_link: true
 github_skip_forks: true
 
@@ -90,11 +96,12 @@ delicious_user:
 delicious_count: 3
 
 # Disqus Comments
-disqus_short_name:
+disqus_short_name: blog-lwolf
 disqus_show_comment_count: false
 
 # Google Analytics
-google_analytics_tracking_id:
+google_analytics_tracking_id: UA-47060494-2
+google_analytics_domain: blog.lwolf.org
 
 # Facebook Like
-facebook_like: false
+facebook_like: true
