@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Coding on lwolfs blog</title>
+    <link>http://blog.lwolf.org/categories/coding/</link>
+    <description>Recent content in Coding on lwolfs blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 27 Jun 2014 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://blog.lwolf.org/categories/coding/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>VK API magic</title>
+      <link>http://blog.lwolf.org/post/2014-06-27-vk-api-magic/</link>
+      <pubDate>Fri, 27 Jun 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://blog.lwolf.org/post/2014-06-27-vk-api-magic/</guid>
+      <description>&lt;p&gt;There are lots of posts about magic behaviour of VK API. But yeasterday I faced another one.
+I have simple button on my site to share page on VK using &lt;code&gt;Wall.post&lt;/code&gt; of OpenAPI, and yesterday I found out that it stopped working.
+After debuging I found error in API response:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Permission to perform this action is denied for non-standalone applications: you should request token using blank.html page.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The magical thing was that this error appears only on one type of pages, while on another everything was fine.&lt;/p&gt;
+
+&lt;p&gt;Nothing I&amp;rsquo;ve found in google helped me.
+And the last idea was that is has something with subdomains. I saw this error only on subdomain. I added subdomains to application settings.
+Nothing changed.&lt;/p&gt;
+
+&lt;p&gt;After comparing everything of two request/responses the only difference was in &lt;code&gt;#&lt;/code&gt; in in url I was trying to share.
+I tried to remove it and&amp;hellip; it works.&lt;/p&gt;
+
+&lt;p&gt;I dont know why VK don&amp;rsquo;t like hashtags in urls and why it returns such a strange response but the fact is - you cant share urls with &lt;code&gt;#&lt;/code&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Getting epoch date for highcharts from sqlalchemy</title>
+      <link>http://blog.lwolf.org/post/2014-06-17-getting-epoch-date-for-highcharts-from-sqlalchemy/</link>
+      <pubDate>Tue, 17 Jun 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://blog.lwolf.org/post/2014-06-17-getting-epoch-date-for-highcharts-from-sqlalchemy/</guid>
+      <description>&lt;p&gt;Short sqlalchemy query to get highcharts ready data from database from datetime field.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;select count(1), extract(epoch from date_trunc(&#39;hour&#39;, created_at)) from bid group by extract(epoch from date_trunc(&#39;hour&#39;, created_at));
+    db.session
+        .query(
+            extract(&#39;epoch&#39;, func.DATE(Bid.created_at)).label(&#39;dt&#39;),
+            func.count()
+        )
+        .filter(Bid.ownership == o)
+        .filter(Bid.created_at &amp;gt; days_to_count )
+        .group_by(&#39;dt&#39;)
+        .order_by(&#39;dt&#39;)
+    )
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Obtaining never-expiring access_token to post on Facebook page</title>
+      <link>http://blog.lwolf.org/post/2014-06-16-obtaining-never-expiring-access-token-to-post-on-facebook-page/</link>
+      <pubDate>Mon, 16 Jun 2014 00:00:00 +0000</pubDate>
+      
+      <guid>http://blog.lwolf.org/post/2014-06-16-obtaining-never-expiring-access-token-to-post-on-facebook-page/</guid>
+      <description>
+
+&lt;p&gt;For one of my projects I needed to post messages to Facebook Fan Page.
+After initial search I found out that Facebook has never-expiring token specially for this.
+It looks like trivial task and I was really surprised when I didn&amp;rsquo;t find any one-page step-by-step manual to get it.
+I decided to write all steps from the beginning, not only part about gettting never-expiring token.&lt;/p&gt;
+
+&lt;h2 id=&#34;proper-permissions:be2fe9f8090e318a51404bb9d1cbedaf&#34;&gt;Proper permissions&lt;/h2&gt;
+
+&lt;p&gt;It&amp;rsquo;s obvious that to post on Page you need special set of permissions - _publish&lt;em&gt;actions&lt;/em&gt;, _manage&lt;em&gt;pages&lt;/em&gt;.&lt;/br&gt;
+You do not need to set these permissions to the whole application in settings, because you need it only for your user (user from whom messages will be posted).
+Facebook provides tool for generating access_tokens:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;https://developers.facebook.com/tools/explorer/
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Here you should select your application and click &lt;code&gt;Get Access Token&lt;/code&gt;. In popup select at least permissions mentioned above and click &lt;code&gt;Get Access Token&lt;/code&gt;.
+Now you have access_token able to post to Page. But it is valid only for 60 minutes. Not good.&lt;/p&gt;
+
+&lt;h2 id=&#34;long-lived-access-token:be2fe9f8090e318a51404bb9d1cbedaf&#34;&gt;Long-lived access_token&lt;/h2&gt;
+
+&lt;p&gt;Getting long-lived access_token is the easiest part. You just need to send your current active &lt;code&gt;short-term access_token&lt;/code&gt;, &lt;code&gt;client_id&lt;/code&gt; and &lt;code&gt;client_secret&lt;/code&gt; to the url:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;https://graph.facebook.com/oauth/access_token?
+    client_id=my_app_id&amp;amp;
+    client_secret=my_app_secret&amp;amp;
+    grant_type=fb_exchange_token&amp;amp;
+    fb_exchange_token=access_token
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Where &lt;code&gt;client_id&lt;/code&gt; and &lt;code&gt;client_secret&lt;/code&gt; are in your application settings.&lt;/p&gt;
+
+&lt;p&gt;And you will get response with new access_token and its expiration date in number of seconds.
+Now you have good access_token valid for 60 days which you can use everywhere. but you need to extend it from time to time.&lt;/p&gt;
+
+&lt;h2 id=&#34;eternal-token:be2fe9f8090e318a51404bb9d1cbedaf&#34;&gt;Eternal token&lt;/h2&gt;
+
+&lt;p&gt;To get never-expiring token you need to use your long-live token.
+All you need is to enter it on:
+    &lt;a href=&#34;https://developers.facebook.com/tools/explorer&#34;&gt;https://developers.facebook.com/tools/explorer&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;And send request to &lt;code&gt;/v2.0/me/accounts&lt;/code&gt;. You should see JSON with all your pages and some basic information about it: ID, Category, Name etc. And among them you will see &lt;code&gt;access_token&lt;/code&gt; for each page. This access_tokens are what we are searching for. They are never-ending.&lt;/p&gt;
+
+
+&lt;figure &gt;
+    
+        &lt;img src=&#34;http://blog.lwolf.org/img/2014/06/token.png&#34; /&gt;
+    
+    
+    &lt;figcaption&gt;
+        &lt;h4&gt;Access_token&lt;/h4&gt;
+        
+    &lt;/figcaption&gt;
+    
+&lt;/figure&gt;
+
+
+&lt;h2 id=&#34;get-info-about-token:be2fe9f8090e318a51404bb9d1cbedaf&#34;&gt;Get info about token&lt;/h2&gt;
+
+&lt;p&gt;Facebook has another helpful endpoint to get information about any token, e.g. Expiration-date, app_id, user_id and scopes associated with it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;https://developers.facebook.com/tools/debug/accesstoken
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you submit our final token here you will see &lt;code&gt;Expires:Never&lt;/code&gt; in response.&lt;/p&gt;
+
+&lt;h2 id=&#34;python-way:be2fe9f8090e318a51404bb9d1cbedaf&#34;&gt;Python way&lt;/h2&gt;
+
+&lt;p&gt;Here is few lines to show how to get it with Python.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;# Facebook SDK
+import facebook
+
+# Init graphAPI with short-lived token
+graph = facebook.GraphAPI(short_token)
+
+# Exchange short-lived-token to long-lived
+long_token = graph.extend_access_token(client_id, client_secret)
+
+# Init graphAPI with long-lived token
+graph = facebook.GraphAPI(long_token[&#39;access_token&#39;])
+
+# Request all pages for user
+pages = graph.get_object(&#39;me/accounts&#39;)
+
+for page in pages[&#39;data&#39;]:
+    print page
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;For each page you will see JSON like this.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+   &#39;access_token&#39;: never-expiring-page-token,
+   &#39;category&#39;: &#39;Product/service&#39;,
+   &#39;id&#39;: PAGE_ID,
+   &#39;name&#39;: PAGE_NAME,
+   &#39;perms&#39;: [
+       &#39;ADMINISTER&#39;, 
+       &#39;EDIT_PROFILE&#39;,
+       &#39;CREATE_CONTENT&#39;,
+       &#39;MODERATE_CONTENT&#39;,
+       &#39;CREATE_ADS&#39;,
+       &#39;BASIC_ADMIN&#39;
+    ]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Now, when I know how to do it, I see that most, if not all, of this could be found on facebook documentation pages.
+But, let it be here.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

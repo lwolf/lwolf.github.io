@@ -1,0 +1,876 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        
+            
+                <title>Move infrastructure to Kubernetes. LoadBalancing.</title>
+            
+        
+
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content="Hugo 0.15" />
+        
+
+
+        
+            <meta name="author" content="Sergey Nuzhdin">
+        
+        
+            
+                <meta name="description" content="Blog about python, docker, kubernetes and other stuff..,">
+            
+        
+
+        
+
+  <meta name="twitter:card" content="summary"/>
+
+
+
+<meta name="twitter:title" content="Move infrastructure to Kubernetes. LoadBalancing."/>
+<meta name="twitter:description" content="Configuring ingress and loadbalancing kubectl create -f ./ingress-lb/default-backend.yaml kubectl expose rc default-http-backend --port=80 --target-port=8080 --name=default-http-backend kubectl create -f ./ingress-lb/nginx-ingress-daemonset.yaml Testing/Staging environment install needed services create separate namespace install gitlab install jenkins install docker-hub create repositories and build jobs Configure autobuild/autodeploy to staging"/>
+
+
+
+        <meta property="og:title" content="Move infrastructure to Kubernetes. LoadBalancing." />
+<meta property="og:description" content="Configuring ingress and loadbalancing kubectl create -f ./ingress-lb/default-backend.yaml kubectl expose rc default-http-backend --port=80 --target-port=8080 --name=default-http-backend kubectl create -f ./ingress-lb/nginx-ingress-daemonset.yaml Testing/Staging environment install needed services create separate namespace install gitlab install jenkins install docker-hub create repositories and build jobs Configure autobuild/autodeploy to staging" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes-part3/" />
+
+
+<meta property="og:updated_time" content="2016-04-25T00:00:00&#43;00:00"/>
+
+
+
+
+
+
+
+
+
+
+        
+<meta itemprop="name" content="Move infrastructure to Kubernetes. LoadBalancing.">
+<meta itemprop="description" content="Configuring ingress and loadbalancing kubectl create -f ./ingress-lb/default-backend.yaml kubectl expose rc default-http-backend --port=80 --target-port=8080 --name=default-http-backend kubectl create -f ./ingress-lb/nginx-ingress-daemonset.yaml Testing/Staging environment install needed services create separate namespace install gitlab install jenkins install docker-hub create repositories and build jobs Configure autobuild/autodeploy to staging">
+
+
+<meta itemprop="dateModified" content="2016-04-25T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="42">
+
+
+
+<meta itemprop="keywords" content="Python,architecture,coding,docker,infrastructure,mac,nginx,sql," />
+
+        
+
+        
+
+        
+        
+            
+        
+
+        
+        
+            <link rel="stylesheet" href="/css/google-font.css" />
+            <link rel="stylesheet" href="/css/font-awesome.min.css" />
+            <link rel="stylesheet" href="/css/main.css" />
+            <link rel="stylesheet" href="/css/add-on.css" />
+            <link rel="stylesheet" href="/css/monokai-sublime.css">
+        
+
+        
+
+        
+        
+        
+            
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-47060494-2', 'auto');
+ga('send', 'pageview');
+</script>
+
+        
+    </head>
+    <body>
+
+        
+        <div id="wrapper">
+
+    
+    
+<header id="header">
+    
+        <h2><a href="/">lwolfs blog</i></a></h2>
+    
+
+    <nav class="links">
+        <ul>
+            
+                <li>
+                    <a href="/post/">
+                        
+                            <i class="fa fa-newspaper-o">&nbsp;</i>Posts
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="/categories/">
+                        Categories
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="/about/">
+                        About
+                    </a>
+                </li>
+            
+        </ul>
+    </nav>
+    <nav class="main">
+        <ul>
+            
+            <li id="share-nav" class="share-menu" style="display:none;">
+                <a class="fa-share-alt" href="#share-menu">Share</a>
+            </li>
+            
+            <li class="search">
+                <a class="fa-search" href="#search">Search</a>
+                <form id="search" method="get" action="//google.com/search">
+                    <input type="text" name="q" placeholder="Search" />
+                    <input type="hidden" name="q" value="site:http://blog.lwolf.org">
+                </form>
+            </li>
+            <li class="menu">
+                <a class="fa-bars" href="#menu">Menu</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+
+<section id="menu">
+
+    
+        <section>
+            <form class="search" method="get" action="//google.com/search">
+                <input type="text" name="q" placeholder="Search" />
+                <input type="hidden" name="q" value="site:http://blog.lwolf.org">
+            </form>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                
+                    <li>
+                        <a href="/post/">
+                            <h3>
+                                
+                                    <i class="fa fa-newspaper-o">&nbsp;</i>
+                                
+                                Posts
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/categories/">
+                            <h3>
+                                
+                                Categories
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/about/">
+                            <h3>
+                                
+                                About
+                            </h3>
+                        </a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    <li>
+                        <a href="http://blog.lwolf.org/post/hosting-own-docker-hub/"><p>Hosting own docker hub with UI and tls</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes/"><p>Move infrastructure to Kubernetes</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes-part2/"><p>Move infrastructure to Kubernetes. Basic services.</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes-part3/"><p>Move infrastructure to Kubernetes. LoadBalancing.</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes-part4/"><p>Move infrastructure to Kubernetes. Staging/Testing infrastucture.</p></a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        
+</section>
+
+    <section id="share-menu">
+    <section id="social-share-nav">
+        <ul class="links">
+            <header>
+                <h3>Share this post <i class="fa fa-smile-o"></i></h3>
+            </header>
+            
+
+
+<li><a href="//twitter.com/share?url=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f&text=Move%20infrastructure%20to%20Kubernetes.%20LoadBalancing.&via=" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f&title=Move%20infrastructure%20to%20Kubernetes.%20LoadBalancing." target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f&title=Move%20infrastructure%20to%20Kubernetes.%20LoadBalancing." target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f&title=Move%20infrastructure%20to%20Kubernetes.%20LoadBalancing." target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Sergey%20Nuzhdin&body=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+</section>
+
+    
+    <div id="main">
+        
+        
+        <article class="post">
+    <header>
+    <div class="title">
+        
+            <h1><a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes-part3/">Move infrastructure to Kubernetes. LoadBalancing.</a></h1>
+            
+        
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2016-04-25'>
+            April 25, 2016</time>
+        <span class="author">Sergey Nuzhdin</span>
+        
+            <p>1 minute read</p>
+        
+        
+    </div>
+</header>
+
+
+    <section id="social-share">
+        <ul class="icons">
+            
+
+
+<li><a href="//twitter.com/share?url=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f&text=Move%20infrastructure%20to%20Kubernetes.%20LoadBalancing.&via=" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f&title=Move%20infrastructure%20to%20Kubernetes.%20LoadBalancing." target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f&title=Move%20infrastructure%20to%20Kubernetes.%20LoadBalancing." target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f&title=Move%20infrastructure%20to%20Kubernetes.%20LoadBalancing." target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Sergey%20Nuzhdin&body=http%3a%2f%2fblog.lwolf.org%2fpost%2fmove-infrastructure-to-kubernetes-part3%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+    
+    
+
+    
+        
+        
+
+
+
+
+    
+    
+        
+    
+
+
+        
+
+        <a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes-part3/" class="image featured">
+            <img src="/img/2016/04/kubernetes.png" alt="" />
+        </a>
+    
+
+
+    
+
+<!-- more -->
+
+<h1 id="configuring-ingress-and-loadbalancing:1486a6b0ad319ffd0831241316b8161c">Configuring ingress and loadbalancing</h1>
+
+<pre><code>kubectl create -f ./ingress-lb/default-backend.yaml
+kubectl expose rc default-http-backend --port=80 --target-port=8080 --name=default-http-backend
+kubectl create -f ./ingress-lb/nginx-ingress-daemonset.yaml
+</code></pre>
+
+<h1 id="testing-staging-environment:1486a6b0ad319ffd0831241316b8161c">Testing/Staging environment</h1>
+
+<h2 id="install-needed-services:1486a6b0ad319ffd0831241316b8161c">install needed services</h2>
+
+<ul>
+<li>create separate namespace</li>
+<li>install gitlab</li>
+<li>install jenkins</li>
+<li>install docker-hub</li>
+</ul>
+
+<h2 id="create-repositories-and-build-jobs:1486a6b0ad319ffd0831241316b8161c">create repositories and build jobs</h2>
+
+<h2 id="configure-autobuild-autodeploy-to-staging:1486a6b0ad319ffd0831241316b8161c">Configure autobuild/autodeploy to staging</h2>
+
+
+    <footer>
+        <ul class="stats">
+    
+
+    
+        
+            <li>
+                
+        
+
+                
+                    Categories
+                
+            </li>
+    
+
+    
+        <li><a href="/categories/architecture">architecture</a></li>
+    
+        <li><a href="/categories/docker">docker</a></li>
+    
+        <li><a href="/categories/infrastructure">infrastructure</a></li>
+    
+</ul>
+
+    </footer>
+</article>
+<ul class="actions pagination">
+    
+        <li><a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes-part4/"
+                class="button big previous">Move infrastructure to Kubernetes. Staging/Testing infrastucture.</a></li>
+    
+
+    
+        <li><a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes-part2/"
+                class="button big next">Move infrastructure to Kubernetes. Basic services.</a></li>
+    
+</ul>
+
+
+
+    
+        <article class="post">
+            <div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'blog-lwolf';
+    var disqus_identifier = 'http:\/\/blog.lwolf.org\/post\/move-infrastructure-to-kubernetes-part3\/';
+    var disqus_title = 'Move infrastructure to Kubernetes. LoadBalancing.';
+    var disqus_url = 'http:\/\/blog.lwolf.org\/post\/move-infrastructure-to-kubernetes-part3\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </article>
+    
+
+
+    </div>
+    
+<section id="sidebar">
+
+    
+        <section id="intro">
+            
+            
+                
+                    <a href="/" class="logo"><img src="/img/author.jpg" alt="Hugo Future Imperfect" /></a>
+                
+            
+            
+                <header>
+                    <h2>LWOLFS BLOG</h2>
+                    <p>Another blog about dev and devops stuff, mostly about python, docker, kubernetes, etc</p>
+                </header>
+            
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/lwolf" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/sergey-nuzhdin-9925b31a" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//facebook.com/snuzhdin" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+
+
+<li><a href="mailto:ipaq.lw@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+        </section>
+
+    
+        <section id="recent-posts">
+            <ul class="posts">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://blog.lwolf.org/post/hosting-own-docker-hub/">Hosting own docker hub with UI and tls</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-05-03'>
+                                    May 3, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes/">Move infrastructure to Kubernetes</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-04-25'>
+                                    April 25, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes-part2/">Move infrastructure to Kubernetes. Basic services.</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-04-25'>
+                                    April 25, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes-part3/">Move infrastructure to Kubernetes. LoadBalancing.</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-04-25'>
+                                    April 25, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="http://blog.lwolf.org/post/move-infrastructure-to-kubernetes-part4/">Move infrastructure to Kubernetes. Staging/Testing infrastucture.</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2016-04-25'>
+                                    April 25, 2016</time>
+                            </header>
+                        </article>
+                    </li>
+                
+
+                
+                    <li>
+                        <ul class="actions">
+                            <li><a href=
+                            
+                                /post/
+                            
+                            class="button">View more posts</a></li>
+                        </ul>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+    
+    
+    
+        <section id="categories">
+            <ul class="posts">
+                <header>
+                    <h3><a href="/categories/">Categories</a></h3>
+                </header>
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="/categories/docker/">docker</a>
+                                <span style="float:right;">5</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="/categories/infrastructure/">infrastructure</a>
+                                <span style="float:right;">5</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="/categories/architecture/">architecture</a>
+                                <span style="float:right;">4</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="/categories/coding/">coding</a>
+                                <span style="float:right;">3</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="/categories/mac/">mac</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="/categories/sql/">sql</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="/categories/python/">Python</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="/categories/nginx/">nginx</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+            </ul>
+        </section>
+    
+
+    
+        
+        <section class="blurb">
+            <h2>About</h2>
+            <p>Some about me text...</p>
+
+            <ul class="actions">
+                <li><a href="/about/" class="button">Learn More</a></li>
+            </ul>
+        </section>
+        
+
+    
+        <section id="footer">
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/lwolf" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/sergey-nuzhdin-9925b31a" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//facebook.com/snuzhdin" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+
+
+<li><a href="mailto:ipaq.lw@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+
+            <p class="copyright">&copy; lwolfs blog. Design: <a href="http://html5up.net" target="_blank">HTML5 UP</a>. Ported by <a href="//github.com/jpescador" target="_blank">Julio Pescador</a>. Powered by <a href="//gohugo.io" target="_blank">Hugo</a></p>
+        </section>
+
+</section>
+
+            </div>
+        <a id="back-to-top" href="#" class="fa fa-arrow-up fa-border fa-2x"></a>
+        
+
+        
+        
+            
+        
+
+        
+        
+            <script src="/js/jquery.min.js"></script>
+            <script src="/js/skel.min.js"></script>
+            <script src="/js/util.js"></script>
+            <script src="/js/main.js"></script>
+            <script src="/js/backToTop.js"></script>
+            <script src="/js/highlight.pack.js"></script>
+        
+
+        
+
+            
+            <script>hljs.initHighlightingOnLoad();</script>
+            
+    </body>
+</html>
+

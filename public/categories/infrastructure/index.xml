@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Infrastructure on lwolfs blog</title>
+    <link>http://blog.lwolf.org/categories/infrastructure/</link>
+    <description>Recent content in Infrastructure on lwolfs blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 03 May 2016 13:13:40 +0200</lastBuildDate>
+    <atom:link href="http://blog.lwolf.org/categories/infrastructure/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Hosting own docker hub with UI and tls</title>
+      <link>http://blog.lwolf.org/post/hosting-own-docker-hub/</link>
+      <pubDate>Tue, 03 May 2016 13:13:40 +0200</pubDate>
+      
+      <guid>http://blog.lwolf.org/post/hosting-own-docker-hub/</guid>
+      <description>
+
+&lt;p&gt;First thing you need if you&amp;rsquo;re using Kubernetes - docker registry. Because its all about containers.
+So in this post I will show how to deploy your own docker registry inside Kubernetes cluster,
+with UI and tls, with basic http authentication.
+&lt;!-- more --&gt;&lt;/p&gt;
+
+&lt;p&gt;I&amp;rsquo;m going to use cluster I deployed in previous &lt;a href=&#34;http://blog.lwolf.org/post/move-infrastructure-to-kubernetes/&#34;&gt;post&lt;/a&gt;
+As short recap - we have kubernetes cluster with few nodes, and external loadbalancer (ubuntu based machine with nginx)
+
+&lt;figure &gt;
+    
+        &lt;img src=&#34;http://blog.lwolf.org/img/2016/04/kube-schema-simple.png&#34; alt=&#34;Kubernetes cluster schema&#34; /&gt;
+    
+    
+&lt;/figure&gt;
+&lt;/p&gt;
+
+&lt;h1 id=&#34;get-ssl-certificates-from-letsencrypt:b665c1e3f6ad60358bef128ef9c9ee2f&#34;&gt;Get ssl certificates from letsencrypt&lt;/h1&gt;
+
+&lt;p&gt;To have proper registry opened to web, we need to get ssl certificates.
+For this we&amp;rsquo;re going to obtain free ssl certificate from letsencrypt.
+In this post I&amp;rsquo;m going to use two domains : &lt;code&gt;example.com&lt;/code&gt; for registry itself and &lt;code&gt;www.example.com&lt;/code&gt; for UI.&lt;/p&gt;
+
+&lt;p&gt;Getting certificates from letsencrypt is described in official &lt;a href=&#34;https://letsencrypt.org/getting-started/&#34;&gt;getting started guide&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;After completing it we shoud have several &lt;code&gt;pem&lt;/code&gt; files, but we need only two of them: &lt;code&gt;fullchain1.pem&lt;/code&gt; and &lt;code&gt;privkey1.pem&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h1 id=&#34;deploy-docker-registry-to-kubernetes:b665c1e3f6ad60358bef128ef9c9ee2f&#34;&gt;Deploy docker registry to kubernetes&lt;/h1&gt;
+
+&lt;p&gt;Deploying docker registry into kubernetes is easy, because kubernetes provides examples in its own repository.
+We are going to use this examples to deploy our registry.
+In &lt;a href=&#34;https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/registry&#34;&gt;kubernetes/cluster/addons/registry&lt;/a&gt; we can find different ways of doing this:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;plain registry without tls or auth&lt;/li&gt;
+&lt;li&gt;registry with lts&lt;/li&gt;
+&lt;li&gt;registry with http auth protection&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;I&amp;rsquo;m going to use registry with tls but with some changes.
+We need to create secret with our certificates.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;kubectl --namespace=kube-system create secret generic registry-tls-secret --from-file=domain.crt=fullchain1.pem --from-file=domain.key=privkey1.pem
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next step is to create replication controller. Since we want to have some frontend, we need to add another container to the POD - &lt;code&gt;registry-tls-rc.yaml&lt;/code&gt;:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-yaml&#34;&gt;apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: kube-registry-v0
+  namespace: kube-system
+  labels:
+    k8s-app: kube-registry
+    version: v0
+spec:
+  replicas: 1
+  selector:
+    k8s-app: kube-registry
+    version: v0
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-registry
+        version: v0
+    spec:
+      containers:
+      - name: registry
+        image: registry:2
+        resources:
+          # keep request = limit to keep this container in guaranteed class
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        env:
+        - name: REGISTRY_HTTP_ADDR
+          value: :5000
+        - name: REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY
+          value: /var/lib/registry
+        - name: REGISTRY_HTTP_TLS_CERTIFICATE
+          value: /certs/domain.crt
+        - name: REGISTRY_HTTP_TLS_KEY
+          value: /certs/domain.key
+        volumeMounts:
+        - name: image-store
+          mountPath: /var/lib/registry
+        - name: cert-dir
+          mountPath: /certs
+        ports:
+        - containerPort: 5000
+          name: registry
+          protocol: TCP
+      - name: registry-ui
+        image: konradkleine/docker-registry-frontend:v2
+        env:
+        - name: ENV_DOCKER_REGISTRY_HOST
+          value: &amp;quot;localhost&amp;quot;
+        - name: ENV_DOCKER_REGISTRY_PORT
+          value: &amp;quot;5000&amp;quot;
+        - name: ENV_DOCKER_REGISTRY_USE_SSL
+          value: &amp;quot;1&amp;quot;
+        ports:
+        - containerPort: 80
+          name: registry
+          protocol: TCP
+      volumes:
+      - name: image-store
+        hostPath:
+          path: /data/docker_registry
+      - name: cert-dir
+        secret:
+          secretName: registry-tls-secret
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We added registry-ui container to our POD with needed settings:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ENV_DOCKER_REGISTRY_HOST&lt;/code&gt; can be &lt;code&gt;localhost&lt;/code&gt; since we will run it on the same pod as registry&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ENV_DOCKER_REGISTRY_USE_SSL&lt;/code&gt; set to 1 to enable ssl&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ENV_DOCKER_REGISTRY_PORT&lt;/code&gt; actual port of registry&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Also we mounted 2 volumes, one with tls secret and one to store actual data on the host.&lt;/p&gt;
+
+&lt;p&gt;And now we need to create Kubernetes Service description &lt;code&gt;registry-tls-svc.yaml&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-yaml&#34;&gt;apiVersion: v1
+kind: Service
+metadata:
+  name: kube-registry
+  namespace: kube-system
+  labels:
+    k8s-app: kube-registry
+    kubernetes.io/name: &amp;quot;KubeRegistry&amp;quot;
+spec:
+  selector:
+    k8s-app: kube-registry
+  type: NodePort
+  ports:
+  - name: registry
+    port: 5000
+    protocol: TCP
+    nodePort: 30299
+  - name: registry-ui
+    port: 80
+    protocol: TCP
+    nodePort: 30949
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We&amp;rsquo;re going to use NodePort type of the service to expose the same ports on all nodes.
+Configuring ingress controllers and proper loadbalancing is out of scope for this post.&lt;/p&gt;
+
+&lt;p&gt;Lets deploy what we have:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;kubectl create -f registry-tls-svc.yaml
+kubectl create -f registry-tls-rc.yaml
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h1 id=&#34;configure-nginx:b665c1e3f6ad60358bef128ef9c9ee2f&#34;&gt;Configure nginx&lt;/h1&gt;
+
+&lt;p&gt;At this point we should have registry up and running.
+I spent some trying to configure nginx to work with ssl and docker registry.
+And then I found awesome &lt;a href=&#34;http://container-solutions.com/running-secured-docker-registry-2-0/&#34;&gt;post&lt;/a&gt; describing it&lt;/p&gt;
+
+&lt;p&gt;Since we want our registry to be accessible only for authorized users we need to create  &lt;code&gt;.htpasswd&lt;/code&gt; file.
+For this we can use &lt;code&gt;htpasswd&lt;/code&gt; command, available in ubuntu (my external loadbalancer runs it) after installing &lt;code&gt;apache-utils&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-bash&#34;&gt;apt-get install apache2-utils
+mkdir /etc/nginx/registry
+cd /etc/nginx/registry
+htpasswd -c .htpasswd exampleuser
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Also we need to put our ssl certificates to &lt;code&gt;/etc/nginx/ssl/dhub&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;After this we can create nginx config with 2 server blocks to serve traffic to our registry and UI&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;upstream registry {
+    server NODE1-IP;
+    server NODE2-IP;
+    server NODE3-IP;
+}
+server {
+    listen 443 ssl;
+
+    server_name example.com;
+
+    add_header Docker-Distribution-Api-Version registry/2.0 always;
+
+    ssl on;
+    ssl_certificate /etc/nginx/ssl/dhub/fullchain.pem;
+    ssl_certificate_key /etc/nginx/ssl/dhub/privkey.pem;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Original-URI $request_uri;
+    proxy_set_header Docker-Distribution-Api-Version registry/2.0;
+
+    # Allow large uploads
+    client_max_body_size 600M;
+
+    location / {
+        auth_basic &amp;quot;Restricted&amp;quot;;
+        auth_basic_user_file /var/www/dhub/.htpasswd;
+        proxy_pass https://registry:30299;
+        proxy_read_timeout 900;
+    }
+    access_log  /var/log/nginx/docker.access.log;
+    error_log   /var/log/nginx/docker.error.log;
+}
+
+server {
+        listen 443 ssl;
+        server_name www.example.com;
+
+        ssl on;
+        ssl_certificate /etc/nginx/ssl/dhub/fullchain.pem;
+        ssl_certificate_key /etc/nginx/ssl/dhub/privkey.pem;
+        location / {
+            auth_basic &amp;quot;Restricted&amp;quot;;
+            auth_basic_user_file /var/www/dhub/.htpasswd;
+            proxy_pass http://registry:30949;
+        }
+        access_log  /var/log/nginx/docker.access.log;
+        error_log   /var/log/nginx/docker.error.log;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can check nginx config for errors before applying changes with &lt;code&gt;nginx -t&lt;/code&gt; and if everything is fine we need to reload it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;/etc/init.d/nginx reload
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Thats it. Now you should be able to use your docker registry.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;docker pull alpine
+docker tag alpine:latest example.com/alpine
+
+docker login -u exampleuser -p &amp;quot;YOURPASSWORD&amp;quot; -e your.email@gmail.com example.com
+docker push example.com/alpine
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Also you should be able to access your registry through frontend on &lt;a href=&#34;https://www.example.com&#34;&gt;https://www.example.com&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
