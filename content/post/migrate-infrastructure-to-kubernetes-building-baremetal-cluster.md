@@ -1,64 +1,64 @@
 +++
 author = "Sergey Nuzhdin"
-categories = ["architecture", "docker", "infrastructure"]
-date = "2016-04-25"
+categories = ["docker", "infrastructure", "kubernetes", "coreos"]
+date = "2016-06-08"
 description = ""
 featured = "kubernetes.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
-draft = true
-title = "Move infrastructure to Kubernetes"
+title = "Migrate infrastructure to Kubernetes: Building baremetal cluster"
 
 +++
 
-I started trying to switch to docker about a year ago, but all tools were kind of `not-production-ready`.
+I started trying to switch to Docker about a year ago, but all tools were kind of `not-production-ready`.
 With docker-compose it was unreal to scale containers without restart. Deis looked like a black box with a lot of magic.
-Then tutum appeared and it was awesome, it was, really, the first working solution. So I switched to it.
+Then Tutum appeared and it was awesome, really, it was the first working solution. So I switched to it.
 It was fine most of the time, yes it had problems with networking, yes it was annoying to copy-paste
 all environment variables into each container, but it was in beta, and it was free.
-But then docker bought it and decided to charge $15 per node. Yes, it became more stable, with better networking.
-But for me it wasn't doing much for me since I'm running everything on baremetal servers.
+But then Docker bought it and decided to charge $15 per node. Of course, it became more stable with better networking.
+But for me Tutum didn't do much since I'm running everything on baremetal servers.
 
-And since I was needed to migrate from tutum and redo my infrastructure anyways either to docker-cloud
-or to something else. Among options there were, except for docker-cloud, raw docker's compose/swarm and kubernetes.
-So, I decided to go away from docker-cloud.
+And since I was forced to migrate from Tutum and redo my infrastructure anyways, move it either to Docker Cloud
+or to something else, I decided to go away from Docker Cloud.
 
 <!-- more -->
 
 # First steps with Kubernetes
 
-First time I tried to use kubernetes even before tutum. I think v1.0 was just released when I tried it.
-After few weeks playing with it, I decided to not use it in production yet. Mostly because of difficulties
-with loadbalancing on baremetal.
-Few weeks ago I was responsible for choosing docker management platform at work and for building cluster on it.
-So I spent some time investigating current solutions and ended up building kuberenetes cluster on CoreOS.
+The first time I tried to use Kubernetes was even before Tutum. I think v1.0 was just released when I tried it.
+After few weeks playing with it, I was very excited. And I was completely sure that I want to use it some day, but not at that moment.
+Mostly because of difficulties with load balancing on baremetal.
 
-After successfull built of test multinode cluster and dev-environment at work
-I spent weekend building cluster for my own projects.
-This will not be the step-by-step tutorial but more like sumarization of my experience.
+Few weeks ago I was responsible for choosing Docker management platform at work and for deploying cluster on it.
+So I spent some time investigating current solutions and ended up building Kuberenetes cluster based on CoreOS.
 
-Basicly for my side projects, I have one physical server with ESXi and a lot of virtual machines.
-Before tutum I used to create one VM per project or service, and ended up with about 20 VMs.
-With tutum I reduced this number to about 8-10. Only 4 of them were related to tutum: 3 VMs for tutum, 1 vm as router.
-Other VMs had some lagacy parts which I didn't want to move to docker for some reasons.
+After success in deploying test multi-node cluster and dev-environment at work
+I spent weekend establishing similar cluster on my own server.
+
+This will not be step-by-step tutorial, but more like a summary of my experience.
+
+Basically for my side projects, I currently have one physical server with ESXi and a lot of virtual machines.
+Before Tutum I used to create one VM per project or service, and ended up with about 20 VMs.
+After switch to docker I reduced this number to about 8-10. Only 4 of them were related to Tutum: 3 VMs for Tutum, 1 vm as router/balancer.
+Other VMs had some legacy parts which I didn't want to move to docker for some reasons.
 
 # Building cluster
-With this switch from tutum to kubernetes I wanted to do it as `production-like` as possible.
-Since I'm going to use CoreOS I want to use its awesome autoupdate feature, and for this I need to have
+With this switch from Tutum to Kubernetes I wanted to do it as `production-like` as possible.
+I'm going to use CoreOS with its awesome autoupdate features, for this I need to have
 several nodes of each type: etcd, kubernetes-masters, kubernetes-minions. Since it will be small cluster
 and I do not want to waste resources, I'm going to have 6 VMs for kubernetes and 1 for external loadbalancer.
 3 of it will run etcd + kubernetes masters and 3 will be minions. Having 3 minions could sound like a waste of resources,
-but, remember, I want to have production-like solution and with 1 minion it will be to easy to go with some stupid solutions,
-like I have only 1 machine, I can use local hard drive for storage or hardcode IP address and port of this node in loadbalancer.
+but, remember, I want to have production-like solution and with 1 minion it will be too easy to go with some stupid solutions,
+like - "I have only 1 machine, I can use local hard drive for storage" or "I can hardcode IP address and port of this node in loadbalancer".
 Also I want to be able to easily scale it to several machines.
 
 Here is a schema of what I'm going to build.
-{{< figure src="/img/2016/04/kube-cluster-schema.png" alt="Kubernetes cluster schema" >}}
+{{< figure src="/img/2016/05/kube-cluster-schema.png" alt="Kubernetes cluster schema" >}}
 
-On schema I have two loadbalancer, but in fact its one.
+On schema I have two loadbalancers, but in fact there is only one.
 
-To achive this I need to have
+To achieve this I need to have
 
 * virtual/physical machines
 * dhcp + (i)pxe for initial boot and install of coreos
@@ -66,13 +66,12 @@ To achive this I need to have
 * write cloud-configs to configure coreos
 
 
-
 ## Configuring dhcp and iPXE
 First step we need to do, after creating VMs, is configure DHCP and iPXE to be able to boot and install CoreOS.
-There are a lot of manuals about how to configure dhcp in ubuntu (I'm running ubuntu on that machine) I'm not going to copy-paste it.
-One thing I want to mention is that I hardcoded MAC/IP addresses of 3 my machines which I'm going to use as ETCd/Kubernetes masters.
+There are a lot of manuals about how to configure dhcp in ubuntu (I'm running ubuntu on that machine), so I'm not going to copy-paste it.
+One thing I want to mention is that I hardcoded MAC/IP addresses of 3 my machines which I'm going to use as Etcd/Kubernetes masters.
 
-here is example of dhcp record cofigured for ETCD master:
+here is example of DHCP record configured for etcd master:
 
 ```
   host kube-etcd-01 {
@@ -99,9 +98,9 @@ boot
 
 ```
 
-At this file we can see that we will run coreos image with cloud-config and ssh key.
-Having your `sshkey` here is useful, when for some reason provisioning/install was not successfull and you need to debug.
-Also as you can see we're telling coreos to use `sh` script as cloud-config. This is done because I want to run coreos-install after boot.
+At this file we  will run coreos image with cloud-config and ssh key.
+Having your `sshkey` on this step is extremely useful, when for some reason provisioning/install was not successful and you need to debug.
+Also as you can see we configured coreos to use `sh` script as cloud-config. This is done because I want to run coreos-install after boot.
 Here is content of `cloud-config-bootstrap-etcd-01.sh`
 
 ```
@@ -112,22 +111,22 @@ sudo coreos-install -d /dev/sda -c cloud-config.yaml -C alpha
 sudo reboot
 ```
 
-This script just downloads real cloud config, installs coreos on disk and reboot.
-This also leads to maintaining 3 files for each type of machine, which I really don't like and plan to change/automate.
+This script just downloads real cloud config, installs CoreOS on disk and reboot.
+Current implementation leads to maintaining 3 files for each type of machine, which I really don't like and plan to change/automate later.
 
 ## Configuring nginx to serve cloud configs
-IPXE can serve configs from many locations, I prefer to use http. And since its just plain text files having nxinx is enough for this.
-Most of example cloud-cofigs you can find in the internet has references to `$private_ipv4` or `$public_ipv4` variables.
-If you're using cloud providers for your coreos setup, this variables will be translated to real addresses. But since we using baremetal setup we
-need to impletement something to have similar behaviour. The easiest way is to use nginx for this.
+iPXE can serve configs from many locations, I prefer to use HTTP. And since its just plain text files having nginx is enough for this.
+Most of example cloud-configs you can find in the internet has references to `$private_ipv4` or `$public_ipv4` variables.
+If you're using cloud providers for your CoreOS setup, this variables will be translated into real addresses. But since we using baremetal setup we
+need to implement something to have similar behaviour. The easiest way is to use nginx for this.
 
 Having `sub_filter $public_ipv4 '$remote_addr';` rule in your nginx location block will put ip address of the host requesting the config instead of variable on the fly.
 
-And again coreos documentaion has example of nginx [config location block](https://coreos.com/os/docs/latest/nginx-host-cloud-config.html)
+And again CoreOS documentation has example of nginx [config location block](https://coreos.com/os/docs/latest/nginx-host-cloud-config.html)
 
 
 ## Generate ssl certificates for master node and admin user
-Generation of ssl certificates for kubernetes is described in details on [coreOS site.](https://coreos.com/kubernetes/docs/latest/openssl.html).
+Generation of ssl certificates for Kubernetes is described in details on [CoreOS site.](https://coreos.com/kubernetes/docs/latest/openssl.html).
 So I will just show my ssl config and commands that needs to be run.
 
 openssl.cnf
@@ -147,12 +146,12 @@ DNS.2 = kubernetes.default
 DNS.3 = kubernetes.default.svc
 DNS.4 = kubernetes.default.svc.cluster.local
 DNS.5 = kubernetes.example.com <- my public domain name
-IP.1 = 10.100.0.1   <- cluster master ip
-IP.2 = 10.10.30.11  <- master/etcd 01
-IP.3 = 10.10.30.12  <- master/etcd 02
-IP.4 = 10.10.30.13  <- master/etcd 03
-IP.5 = 10.10.30.1 <- loadbalancer IP
-IP.6 = 111.111.111.111 <- my public IP
+IP.1 = 10.100.0.1       # <- cluster master ip
+IP.2 = 10.10.30.11      # <- master/etcd 01
+IP.3 = 10.10.30.12      # <- master/etcd 02
+IP.4 = 10.10.30.13      # <- master/etcd 03
+IP.5 = 10.10.30.1       # <- loadbalancer IP
+IP.6 = 111.111.111.111  # <- my public IP
 
 ```
 
@@ -174,11 +173,10 @@ $ openssl x509 -req -in admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -
 ## Writing cloud-configs
 
 At this point we have everything in place, except for cloud-configs.
-I'm not going to describe all parts of cloudconfigs, [coreos](https://coreos.com/os/docs/latest/cloud-config.html) did it really great
 
-Lets start from etcd/master node. There are two ways to configure etcd cluster.
- First is to use initial seed cluster - basicaly you know the nodes and IP addresses of your etcd cluster and just hardcode it in config.
- The second one is to use coreos cloud discovery.
+Lets start with etcd/master node. There are two ways to configure etcd cluster.
+ First is to use initial seed cluster - basically it means that you know IP addresses of your etcd cluster and just hardcode it in config.
+ The second one is to use CoreOS cloud discovery service.
 
 In depth comparison is available [here](https://coreos.com/etcd/docs/latest/clustering.html)
 
@@ -205,15 +203,15 @@ coreos:
 Now lets take a look what we need to add here to run kubernetes master services on the same node:
 
 * We need to put our ssl certificates
-* Download kubernetes binaries
-* Write systemD units
+* Download Kubernetes binaries
+* Write SystemD units
 
 
 Lets start with certificates.
-To put it on the machine we can either download it from somewhere during boot or just hardcode it into cloudconfig.
+To put it on the machine we can either download it from somewhere during boot or just hardcode it into cloud-config.
 For now I'm going to use second option.
 
-To do this, lets add `write-files:` block to our cloudconfig:
+To do this, lets add `write-files:` block to our cloud-config:
 Since we already generated all ssl certificates, we just need to copy-paste the content to corresponding blocks.
 
 ```yaml
@@ -240,9 +238,9 @@ Since we already generated all ssl certificates, we just need to copy-paste the 
 
 ```
 
-Having something in `write-files` is a convenient way for adding something to the system during boot.
+Having something in `write-files` is a convenient way to create files during boot.
 
-Lets create write another file, which will be responsible for checking availability of needed port.
+Lets create another file, which will be responsible for checking availability of provided port.
 
 ```yaml
   - path: /opt/bin/wupiao
@@ -257,7 +255,7 @@ Lets create write another file, which will be responsible for checking availabil
       exit $?
 ```
 
-Next we need to download kubernetes binaries, lets write another file for this
+Next we need to download Kubernetes binaries, lets write another file for this
 
 ```yaml
   - path: /opt/bin/kubernetes-install.sh
@@ -284,9 +282,9 @@ Next we need to download kubernetes binaries, lets write another file for this
       fi
 ```
 
-Script is simple, create needed folders and if download binaries if needed.
-K8S_VERSION will have the latest stable version of kubernetes. We will configure coreos to run this script during boot.
-Now when all files are in place we just need to configure systemD units to start everything.
+Script is simple, create folders and download binaries if needed.
+K8S_VERSION will have the latest stable version of kubernetes. We will configure CoreOS to run this script during boot.
+Now when all files are in place we just need to configure SystemD units to start services.
 
 ```yaml
 coreos:
@@ -320,10 +318,10 @@ coreos:
         RemainAfterExit=yes
         Type=oneshot
 ```
-Lets start with this two. First one will run our kubernetes installer, and the second one will create network environment file.
+First one will run our Kubernetes installer, and the second one will create network environment file.
 Which is very helpful in some cases. For example you can have your current IP address as environment variable.
 
-And of course we need to run kubernetes services:
+And of course we need to run Kubernetes services:
 
 ```yaml
     - name: kube-apiserver.service
@@ -404,23 +402,36 @@ And of course we need to run kubernetes services:
 
 ```
 
-Everything here is relatively simple, and could be found in almost eny example of cloud config. But few things I want to highlight.
+Everything here is relatively simple, and could be found in almost any example of cloud-config. But few things I want to highlight.
 `${DEFAULT_IPV4}` variable is populated by `setup-network-environment.service` we created earlier. We can use either this or our nginx configuration.
 Also I have `--insecure_bind_address=0.0.0.0` inside `kube-apiserver.service`,
-because currently I have isolated network, and my nodes can't be accessed from the internet. Otherwise it should contain your internal IP or localhost.
+its fine for me since I have isolated network, and my nodes can't be accessed from the internet. Otherwise it should contain your internal IP or localhost.
 
 The last thing, is `--apiserver-count=3`. If you have more than one master, you should set this parameter to avoid problems.
 
-Complete cloud-config could be found in [github repository](#)
+Complete cloud-config could be found in [github repository](https://github.com/lwolf/kubernetes-cluster/tree/master/cloud_configs)
 
-That's all for masters. At this stage we can start all 3 master master-nodes.
-After several minutes you should have working etcd cluster with kubernetes cluster.
-But we have not minions, only masters. So lets go through configuratino of minions.
+That's all for masters. At this stage we can start all 3 master nodes.
+After several minutes you should have working etcd cluster with Kubernetes cluster.
+To check that everything works you can ssh to this nodes and check that etcd works and there is no failed units:
+
+```
+core@localhost ~ $ etcdctl cluster-health
+member 6f64c79d91518941 is healthy: got healthy result from http://10.10.30.12:2379
+member c86dddc968164491 is healthy: got healthy result from http://10.10.30.13:2379
+member d20e1a20a0b67ba1 is healthy: got healthy result from http://10.10.30.11:2379
+cluster is healthy
+core@localhost ~ $ systemctl --failed
+0 loaded units listed. Pass --all to see loaded but inactive units, too.
+To show all installed unit files use 'systemctl list-unit-files'.
+```
+
+But we have no minions, only masters. So lets go through configuration of minions.
 
 
 #### Configuring minions
-Since we want to have any number of minions and be able to add/remove it at any time, config should be the same for all, without any hardcoding.
-That's why will generate client's ssl certicates during install.
+Since we want to have any number of minions and be able to add/remove it at any time, config should be the same for all.
+First of all this means that we need to generate client's ssl certificates during install.
 
 ```yaml
   - path: /etc/kubernetes/ssl/worker-openssl.cnf
@@ -507,9 +518,7 @@ Also we need to have scripts to check ports and install kubernetes.
 ```
 
 Also we are going to run etcd on all nodes, but not the same way as on masters, here we will run it in proxy mode
-# #############################
-# TODO: write about proxy mode
-# #############################
+More about it on [CoreOS documentation](https://coreos.com/etcd/docs/latest/proxy.html)
 
 ```yaml
   etcd2:
@@ -520,13 +529,14 @@ Also we are going to run etcd on all nodes, but not the same way as on masters, 
 ```
 
 
+
 All SystemD units for minions is self describing and has nothing special.
-The only thing worth mentionioing is DNS. It took me few days to understand this
-chicken-egg problem. Kubernetes by itself has no DNS service, and you should install it afterwads.
+The only thing worth mentioning is DNS. It took me few days at the beginning to understand this
+chicken-egg problem. Kubernetes by itself has no DNS service, and you should install it afterwards.
 In fact it is really easy - just create service and replication controller from receipts,
-you can find in the kubernetes repository.
+which you can find in the Kubernetes repository.
 But, you need to decide about your internal domain zone and service IP address of your dns server
-before you create your minions and hardcode it in your kubelet config.
+before you create your minions and write it in your kubelet config.
 So you need minion to deploy dns service, but you need to configure minion to know IP address of the future DNS.
 
 ```
@@ -538,18 +548,18 @@ So you need minion to deploy dns service, but you need to configure minion to kn
 
 ```
 
-Complete cloud-config for minions could be found [on github](#)
+Complete cloud-config for minions could be found [on github](https://github.com/lwolf/kubernetes-cluster/tree/master/cloud_configs)
 
 
-# Checking that evething works
-First of all we need to install `kubectl` tool to be able to talk to our cluster.
+# Checking that everything works
+To check that everything works we need to install `kubectl` tool to be able to talk to our cluster.
 
 There are two ways you can talk to your cluster - first is secured channel using ssl keys we generated
-earlie and the second one using insecure port 8080, but only in case you configured kube-apiserver
+earlier. Second one using insecure port 8080, but only in case you configured kube-apiserver
 to listen anything other than localhost.
 
-This is perfectly described at [documentation](#)
-After following documentaion you should be able to execute `kubectl` command and have config at `~/.kube/config` with something like this:
+This is perfectly described at [documentation](https://coreos.com/kubernetes/docs/latest/configure-kubectl.html)
+After following documentation you should be able to execute `kubectl` command and have config at `~/.kube/config` with something like this:
 
 ```
 apiVersion: v1
@@ -578,14 +588,14 @@ If not - something went wrong and you should check the logs and try to fix it :)
 
 Of course feel free to ping me and I'll try to help.
 
-Since it already a huge post, I'm going to finish it here.
+Since its already a huge post, I'm going to finish it here.
 At this point we have fully operational cluster with several masters and several minions.
-In the next post I will walk through deploying some basic services like: dns, heapster, dashboards and logs collecting.
+In the next post I will walk through deploying some basic services like: dns, heapster and dashboards.
 
 
 ## Problems during deploy
 ### Resetting endpoints for master service "kubernetes"
-After deploing multiple masters I saw this message every minute or so
+After deploying multiple masters I've got this message every minute or so
 
 ```bash
 Apr 17 11:48:34 etcd01 kube-apiserver[1040]: W0417 11:48:34.571681    1040 controller.go:297] Resetting endpoints for master service "kubernetes" to &{{ } {kubernetes  default  f76faadd-0487-11e6-8614-000c29d236c7 7314 0 2016-04-17 10:34:29 +0000 UTC <nil> <nil> map[] map[]} [{[{10.10.30.11 <nil>}] [] [{https 443 TCP}]}]}
@@ -606,15 +616,136 @@ In my case it happened because I didn't add flag `--apiserver-count=N` to `kube-
 ```
 
 ### Ignoring not a miss
-This one I still didn't fix, luckily it doesn't cause any major problems.
+This one I still can't fix, luckily it doesn't cause any major problems.
 
 ```
 Apr 18 07:59:11 etcd01 sdnotify-proxy[866]: I0418 07:59:11.903461 00001 vxlan.go:340] Ignoring not a miss: aa:25:34:2a:9c:7a, 10.3.77.10
 ```
 
+### runtime/cgo: pthread_create failed: Resource temporarily unavailable
+
+After I migrated part of my real services to newly created cluster, I started to see error messages like "unable to fork", "unable to create new threads".
+This is one of the most common tracebacks:
+
+```
+runtime/cgo: pthread_create failed: Resource temporarily unavailable
+SIGABRT: abort
+PC=0x7ff4ed4f769b m=4
+
+goroutine 0 [idle]:
+
+goroutine 1 [chan receive, locked to thread]:
+text/template/parse.(*Tree).peekNonSpace(0xc820090700, 0x10, 0x2f, 0x19ac76f, 0x1)
+    /usr/lib/go/src/text/template/parse/parse.go:112 +0x169
+text/template/parse.(*Tree).pipeline(0xc820090700, 0x1683fe8, 0x2, 0x1)
+    /usr/lib/go/src/text/template/parse/parse.go:383 +0x5f
+text/template/parse.(*Tree).parseControl(0xc820090700, 0x1, 0x1683fe8, 0x2, 0x0, 0x3, 0x0, 0x0, 0x0)
+    /usr/lib/go/src/text/template/parse/parse.go:450 +0x133
+text/template/parse.(*Tree).ifControl(0xc820090700, 0x0, 0x0)
+    /usr/lib/go/src/text/template/parse/parse.go:486 +0x5c
+text/template/parse.(*Tree).action(0xc820090700, 0x0, 0x0)
+    /usr/lib/go/src/text/template/parse/parse.go:366 +0xfe
+text/template/parse.(*Tree).textOrAction(0xc820090700, 0x0, 0x0)
+    /usr/lib/go/src/text/template/parse/parse.go:347 +0x8d
+text/template/parse.(*Tree).parse(0xc820090700, 0xc8202f8690, 0x0, 0x0)
+    /usr/lib/go/src/text/template/parse/parse.go:292 +0x684
+text/template/parse.(*Tree).Parse(0xc820090700, 0x19ac740, 0xf0, 0x0, 0x0, 0x0, 0x0, 0xc8202f8690, 0xc8202fc2c0, 0x2, ...)
+    /usr/lib/go/src/text/template/parse/parse.go:231 +0x269
+text/template/parse.Parse(0x1683090, 0x5, 0x19ac740, 0xf0, 0x0, 0x0, 0x0, 0x0, 0xc8202fc2c0, 0x2, ...)
+    /usr/lib/go/src/text/template/parse/parse.go:54 +0x14c
+text/template.(*Template).Parse(0xc8202fa180, 0x19ac740, 0xf0, 0x10, 0x0, 0x0)
+    /usr/lib/go/src/text/template/template.go:195 +0x2ab
+github.com/opencontainers/runc/libcontainer.init()
+    /build/amd64-usr/var/tmp/portage/app-emulation/docker-1.10.3-r2/work/docker-1.10.3/vendor/src/github.com/opencontainers/runc/libcontainer/generic_error.go:31 +0x173
+github.com/docker/docker/daemon/execdriver.init()
+    /build/amd64-usr/var/tmp/portage/app-emulation/docker-1.10.3-r2/work/docker-1.10.3/.gopath/src/github.com/docker/docker/daemon/execdriver/utils_unix.go:125 +0x56
+github.com/docker/docker/daemon/exec.init()
+    /build/amd64-usr/var/tmp/portage/app-emulation/docker-1.10.3-r2/work/docker-1.10.3/.gopath/src/github.com/docker/docker/daemon/exec/exec.go:122 +0x45
+github.com/docker/docker/container.init()
+    /build/amd64-usr/var/tmp/portage/app-emulation/docker-1.10.3-r2/work/docker-1.10.3/.gopath/src/github.com/docker/docker/container/store.go:28 +0x76
+github.com/docker/docker/daemon.init()
+    /build/amd64-usr/var/tmp/portage/app-emulation/docker-1.10.3-r2/work/docker-1.10.3/.gopath/src/github.com/docker/docker/daemon/wait.go:17 +0x5b
+github.com/docker/docker/api/server/router/local.init()
+    /build/amd64-usr/var/tmp/portage/app-emulation/docker-1.10.3-r2/work/docker-1.10.3/.gopath/src/github.com/docker/docker/api/server/router/local/local.go:107 +0xa3
+github.com/docker/docker/api/server/router/build.init()
+    /build/amd64-usr/var/tmp/portage/app-emulation/docker-1.10.3-r2/work/docker-1.10.3/.gopath/src/github.com/docker/docker/api/server/router/build/build_routes.go:274 +0x44
+github.com/docker/docker/api/server.init()
+    /build/amd64-usr/var/tmp/portage/app-emulation/docker-1.10.3-r2/work/docker-1.10.3/.gopath/src/github.com/docker/docker/api/server/server_unix.go:132 +0xad
+main.init()
+    /build/amd64-usr/var/tmp/portage/app-emulation/docker-1.10.3-r2/work/docker-1.10.3/docker/flags.go:30 +0x92
+
+goroutine 17 [syscall, locked to thread]:
+runtime.goexit()
+    /usr/lib/go/src/runtime/asm_amd64.s:1721 +0x1
+
+goroutine 6 [syscall]:
+os/signal.loop()
+    /usr/lib/go/src/os/signal/signal_unix.go:22 +0x18
+created by os/signal.init.1
+    /usr/lib/go/src/os/signal/signal_unix.go:28 +0x37
+
+goroutine 7 [runnable]:
+text/template/parse.lexSpace(0xc820212e00, 0x1986140)
+    /usr/lib/go/src/text/template/parse/lex.go:346 +0xe5
+text/template/parse.(*lexer).run(0xc820212e00)
+    /usr/lib/go/src/text/template/parse/lex.go:206 +0x52
+created by text/template/parse.lex
+    /usr/lib/go/src/text/template/parse/lex.go:199 +0x15d
+
+rax    0x0
+rbx    0x7ff4eb518cb0
+rcx    0x7ff4ed4f769b
+rdx    0x6
+rdi    0x1
+rsi    0x4
+rbp    0x7ff4eb518830
+rsp    0x7ff4eb518830
+r8     0x7ff4ed8698e0
+r9     0x7ff4eb519700
+r10    0x8
+r11    0x202
+r12    0x2c
+r13    0x197ec2c
+r14    0x0
+r15    0x8
+rip    0x7ff4ed4f769b
+rflags 0x202
+cs     0x33
+fs     0x0
+gs     0x0
+```
+
+Some of solutions:
+
+ * set DefaultTasksMax=infinity in /etc/systemd/system.conf as stated in [this ticket](https://github.com/coreos/bugs/issues/1266)
+ * increase limits for docker daemon:
+
+```
+    - name: docker.service
+      command: start
+      drop-ins:
+        - name: 30-increase-ulimit.conf
+          content: |
+            [Service]
+            LimitMEMLOCK=infinity
+            TasksMax=infinity
+            LimitNPROC=infinity
+            LimitNOFILE=infinity
+
+```
+
+### Fleet engine stops and all pods are moved from the node
+After I moved all my containers to production cluster I started to see strange things.
+Everyday, at least once a day, all containers were moved from one random node to others.
+After some debugging and monitoring I found that issue was in fleet service.
+And also I found great blog post describing how to fix this problem
+
+ * http://blog.feedpresso.com/2015/10/16/tuning-fleet-and-etcd-on-coreos-to-avoid-unit-failures.html
+ * https://github.com/coreos/fleet/issues/1289
+
 
 One hint, which is kind of obvious, but in fact it saved me a lot of time.
-Since you will create/destroy CoreOS instances tens or even hundreds of times - add this block to your ssh config to avoid deleting hosts from known_hosts file.
+Since you will create/destroy CoreOS instances tens of times - add this block to your ssh config to avoid deleting hosts from known_hosts file.
 
 ```
  Host 10.10.30.*

@@ -6,6 +6,7 @@ preserveTaxonomyNames = true
 paginate = 5
 disqusShortname = "blog-lwolf"
 googleAnalytics = "UA-47060494-2"
+relativeURLs = true
 
 [params]
     # Sets the meta tag description, usually reserved for the main page

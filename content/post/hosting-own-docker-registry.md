@@ -1,36 +1,35 @@
 +++
 author = "Sergey Nuzhdin"
-categories = ["nginx", "docker", "infrastructure"]
-date = "2016-05-03T13:13:40+02:00"
-description = ""
-featured = ""
+categories = ["nginx", "docker", "infrastructure", "kubernetes"]
+date = "2016-06-08"
+description = "Deploying docker registry with UI and tls for kubernetes cluster"
+featured = "private-containers.png"
 featuredalt = ""
-featuredpath = ""
+featuredpath = "date"
 linktitle = ""
-draft = true
-title = "Hosting own docker hub with UI and tls"
+title = "Hosting own docker registry with UI and tls"
 
 +++
-First thing you need if you're using Kubernetes - docker registry. Because its all about containers.
-So in this post I will show how to deploy your own docker registry inside Kubernetes cluster,
+First thing you need if you're using Kubernetes - Docker registry. Because its all about containers.
+So in this post I will show how to deploy your own registry inside Kubernetes cluster,
 with UI and tls, with basic http authentication.
 <!-- more -->
 
-I'm going to use cluster I deployed in previous [post](http://blog.lwolf.org/post/move-infrastructure-to-kubernetes/)
-As short recap - we have kubernetes cluster with few nodes, and external loadbalancer (ubuntu based machine with nginx)
-{{< figure src="/img/2016/04/kube-schema-simple.png" alt="Kubernetes cluster schema" >}}
+I'm going to use cluster I deployed in previous [post](/post/migrate-infrastructure-to-kubernetes-building-baremetal-cluster/).
+As short recap - we have Kubernetes cluster with few nodes, and external loadbalancer (ubuntu based machine with nginx)
+{{< figure src="/img/2016/05/kube-schema-simple.png" alt="Kubernetes cluster schema" >}}
 
-# Get ssl certificates from letsencrypt
-To have proper registry opened to web, we need to get ssl certificates.
-For this we're going to obtain free ssl certificate from letsencrypt.
-In this post I'm going to use two domains : `example.com` for registry itself and `www.example.com` for UI.
+# Get ssl certificates from Let's Encrypt
+To have proper registry opened to the web, we need to get ssl certificates.
+For this we're going to obtain free ssl certificate from [Let's Encrypt](https://letsencrypt.org/).
+In this post I'm going to use two domains: `example.com` for registry itself and `www.example.com` for UI.
 
-Getting certificates from letsencrypt is described in official [getting started guide](https://letsencrypt.org/getting-started/)
+Getting certificates from Let's Encrypt is described in official [getting started guide](https://letsencrypt.org/getting-started/)
 
-After completing it we shoud have several `pem` files, but we need only two of them: `fullchain1.pem` and `privkey1.pem`.
+After completing it we should have several `pem` files, but we need only two of them: `fullchain1.pem` and `privkey1.pem`.
 
-# Deploy docker registry to kubernetes
-Deploying docker registry into kubernetes is easy, because kubernetes provides examples in its own repository.
+# Deploy docker registry to Kubernetes
+Deploying docker registry into Kubernetes is easy, mostly because Kubernetes provides examples in its own repository.
 We are going to use this examples to deploy our registry.
 In [kubernetes/cluster/addons/registry](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/registry) we can find different ways of doing this:
 
@@ -38,7 +37,7 @@ In [kubernetes/cluster/addons/registry](https://github.com/kubernetes/kubernetes
 * registry with lts
 * registry with http auth protection
 
-I'm going to use registry with tls but with some changes.
+We're going to use registry with tls but with some changes.
 We need to create secret with our certificates.
 
 ```bash
@@ -164,8 +163,8 @@ kubectl create -f registry-tls-rc.yaml
 
 # Configure nginx
 At this point we should have registry up and running.
-I spent some trying to configure nginx to work with ssl and docker registry.
-And then I found awesome [post](http://container-solutions.com/running-secured-docker-registry-2-0/) describing it
+I spent some time trying to configure nginx to work with ssl and docker registry.
+And then I found awesome [post](http://container-solutions.com/running-secured-docker-registry-2-0/) describing it.
 
 Since we want our registry to be accessible only for authorized users we need to create  `.htpasswd` file.
 For this we can use `htpasswd` command, available in ubuntu (my external loadbalancer runs it) after installing `apache-utils`
