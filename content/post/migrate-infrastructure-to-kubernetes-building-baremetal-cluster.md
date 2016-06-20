@@ -27,36 +27,37 @@ or to something else, I decided to go away from Docker Cloud.
 # First steps with Kubernetes
 
 The first time I tried to use Kubernetes was even before Tutum. I think v1.0 was just released when I tried it.
-After few weeks playing with it, I was very excited. And I was completely sure that I want to use it some day, but not at that moment.
+After few weeks playing with it, I was very excited. And I was completely sure that I want to use it someday, but not at that moment.
 Mostly because of difficulties with load balancing on baremetal.
 
-Few weeks ago I was responsible for choosing Docker management platform at work and for deploying cluster on it.
+A few weeks ago I was responsible for choosing Docker management platform at work and for deploying cluster on it.
 So I spent some time investigating current solutions and ended up building Kuberenetes cluster based on CoreOS.
 
 After success in deploying test multi-node cluster and dev-environment at work
 I spent weekend establishing similar cluster on my own server.
 
-This will not be step-by-step tutorial, but more like a summary of my experience.
+This will not be the step-by-step tutorial, but more like a summary of my experience.
 
 Basically for my side projects, I currently have one physical server with ESXi and a lot of virtual machines.
-Before Tutum I used to create one VM per project or service, and ended up with about 20 VMs.
-After switch to docker I reduced this number to about 8-10. Only 4 of them were related to Tutum: 3 VMs for Tutum, 1 vm as router/balancer.
+Before Tutum I used to create one VM per project or service and ended up with about 20 VMs.
+After the switch to docker, I reduced this number to about 8-10. Only 4 of them were related to Tutum: 3 VMs for Tutum, 1 VM as router/balancer.
 Other VMs had some legacy parts which I didn't want to move to docker for some reasons.
 
 # Building cluster
 With this switch from Tutum to Kubernetes I wanted to do it as `production-like` as possible.
-I'm going to use CoreOS with its awesome autoupdate features, for this I need to have
-several nodes of each type: etcd, kubernetes-masters, kubernetes-minions. Since it will be small cluster
-and I do not want to waste resources, I'm going to have 6 VMs for kubernetes and 1 for external loadbalancer.
+I'm going to use CoreOS with its awesome auto update features, for this, I need to have
+several nodes of each type: etcd, kubernetes-masters, kubernetes-minions. Since it will be the small cluster
+and I do not want to waste resources, I'm going to have 6 VMs for Kubernetes and 1 for external loadbalancer.
 3 of it will run etcd + kubernetes masters and 3 will be minions. Having 3 minions could sound like a waste of resources,
 but, remember, I want to have production-like solution and with 1 minion it will be too easy to go with some stupid solutions,
 like - "I have only 1 machine, I can use local hard drive for storage" or "I can hardcode IP address and port of this node in loadbalancer".
-Also I want to be able to easily scale it to several machines.
+Also, I want to be able to easily scale it to several machines.
 
 Here is a schema of what I'm going to build.
+
 {{< figure src="/img/2016/05/kube-cluster-schema.png" alt="Kubernetes cluster schema" >}}
 
-On schema I have two loadbalancers, but in fact there is only one.
+On schema, I have two loadbalancers, but in fact, there is only one.
 
 To achieve this I need to have
 
@@ -67,11 +68,11 @@ To achieve this I need to have
 
 
 ## Configuring dhcp and iPXE
-First step we need to do, after creating VMs, is configure DHCP and iPXE to be able to boot and install CoreOS.
-There are a lot of manuals about how to configure dhcp in ubuntu (I'm running ubuntu on that machine), so I'm not going to copy-paste it.
+The first step we need to do, after creating VMs, is to configure DHCP and iPXE to be able to boot and install CoreOS.
+There are a lot of manuals about how to configure DHCP in ubuntu (I'm running ubuntu on that machine), so I'm not going to copy-paste it.
 One thing I want to mention is that I hardcoded MAC/IP addresses of 3 my machines which I'm going to use as Etcd/Kubernetes masters.
 
-here is example of DHCP record configured for etcd master:
+here is an example of DHCP record configured for Etcd master:
 
 ```
   host kube-etcd-01 {
@@ -86,7 +87,7 @@ here is example of DHCP record configured for etcd master:
    }
 ```
 
-and here is example of the `ipxe-kube-etcd-01` config:
+and here is an example of the `ipxe-kube-etcd-01` config:
 
 ```
 #!ipxe
@@ -98,9 +99,9 @@ boot
 
 ```
 
-At this file we  will run coreos image with cloud-config and ssh key.
-Having your `sshkey` on this step is extremely useful, when for some reason provisioning/install was not successful and you need to debug.
-Also as you can see we configured coreos to use `sh` script as cloud-config. This is done because I want to run coreos-install after boot.
+At this file, we  will run CoreOS image with cloud-config and ssh key.
+Having your ssh key on this step is extremely useful when for some reason provisioning/install was not successful and you need to debug.
+Also, as you can see we configured CoreOS to use `sh` script as cloud-config. This is done because I want to run coreos-install after boot.
 Here is content of `cloud-config-bootstrap-etcd-01.sh`
 
 ```
@@ -115,19 +116,19 @@ This script just downloads real cloud config, installs CoreOS on disk and reboot
 Current implementation leads to maintaining 3 files for each type of machine, which I really don't like and plan to change/automate later.
 
 ## Configuring nginx to serve cloud configs
-iPXE can serve configs from many locations, I prefer to use HTTP. And since its just plain text files having nginx is enough for this.
-Most of example cloud-configs you can find in the internet has references to `$private_ipv4` or `$public_ipv4` variables.
-If you're using cloud providers for your CoreOS setup, this variables will be translated into real addresses. But since we using baremetal setup we
-need to implement something to have similar behaviour. The easiest way is to use nginx for this.
+iPXE can serve configs from many locations, I prefer to use HTTP. And since it's just plain text files having Nginx is enough for this.
+Most of example cloud-configs you can find on the internet has references to `$private_ipv4` or `$public_ipv4` variables.
+If you're using cloud providers for your CoreOS setup, these variables will be translated into real addresses. But since we using baremetal setup we
+need to implement something to have similar behavior. The easiest way is to use Nginx for this.
 
-Having `sub_filter $public_ipv4 '$remote_addr';` rule in your nginx location block will put ip address of the host requesting the config instead of variable on the fly.
+Having `sub_filter $public_ipv4 '$remote_addr';` rule in your Nginx location block will put IP address of the host requesting the config instead of a variable on the fly.
 
-And again CoreOS documentation has example of nginx [config location block](https://coreos.com/os/docs/latest/nginx-host-cloud-config.html)
+And again CoreOS documentation has example of Nginx [config location block](https://coreos.com/os/docs/latest/nginx-host-cloud-config.html)
 
 
 ## Generate ssl certificates for master node and admin user
-Generation of ssl certificates for Kubernetes is described in details on [CoreOS site.](https://coreos.com/kubernetes/docs/latest/openssl.html).
-So I will just show my ssl config and commands that needs to be run.
+Generation of SSL certificates for Kubernetes is described in details on [CoreOS site.](https://coreos.com/kubernetes/docs/latest/openssl.html).
+So I will just show my SSL config and commands that need to be run.
 
 openssl.cnf
 
@@ -172,17 +173,17 @@ $ openssl x509 -req -in admin.csr -CA ca.pem -CAkey ca-key.pem -CAcreateserial -
 
 ## Writing cloud-configs
 
-At this point we have everything in place, except for cloud-configs.
+At this point, we have everything in place, except for cloud-configs.
 
-Lets start with etcd/master node. There are two ways to configure etcd cluster.
- First is to use initial seed cluster - basically it means that you know IP addresses of your etcd cluster and just hardcode it in config.
+Let's start with Etcd/master node. There are two ways to configure Etcd cluster.
+ First is to use initial seed cluster - basically, it means that you know IP addresses of your Etcd cluster and just hardcode it in config.
  The second one is to use CoreOS cloud discovery service.
 
 In depth comparison is available [here](https://coreos.com/etcd/docs/latest/clustering.html)
 
 Since I know IP addresses of all my master nodes I'm going to use initial seed cluster.
 
-My etcd configuration block looks like this:
+My Etcd configuration block looks like this:
 
 ```yaml
 #cloud-config
@@ -200,19 +201,20 @@ coreos:
     initial-cluster-state: new
 ```
 
-Now lets take a look what we need to add here to run kubernetes master services on the same node:
+Now let's take a look what we need to add here to run Kubernetes master services on the same node:
 
 * We need to put our ssl certificates
 * Download Kubernetes binaries
 * Write SystemD units
 
 
-Lets start with certificates.
+Let's start with certificates.
 To put it on the machine we can either download it from somewhere during boot or just hardcode it into cloud-config.
-For now I'm going to use second option.
+For now, I'm going to use the second option.
 
-To do this, lets add `write-files:` block to our cloud-config:
-Since we already generated all ssl certificates, we just need to copy-paste the content to corresponding blocks.
+To do this lets add `write-files:` block to our cloud-config:
+Since we already generated all SSL certificates, we just need to copy-paste the content to corresponding blocks.
+
 
 ```yaml
   - path: /etc/kubernetes/ssl/ca.pem
@@ -240,7 +242,7 @@ Since we already generated all ssl certificates, we just need to copy-paste the 
 
 Having something in `write-files` is a convenient way to create files during boot.
 
-Lets create another file, which will be responsible for checking availability of provided port.
+Let's create another file, which will be responsible for checking the availability of provided port.
 
 ```yaml
   - path: /opt/bin/wupiao
@@ -255,7 +257,7 @@ Lets create another file, which will be responsible for checking availability of
       exit $?
 ```
 
-Next we need to download Kubernetes binaries, lets write another file for this
+Next, we need to download Kubernetes binaries, let's write another file for this
 
 ```yaml
   - path: /opt/bin/kubernetes-install.sh
@@ -282,8 +284,8 @@ Next we need to download Kubernetes binaries, lets write another file for this
       fi
 ```
 
-Script is simple, create folders and download binaries if needed.
-K8S_VERSION will have the latest stable version of kubernetes. We will configure CoreOS to run this script during boot.
+The script is simple, create folders and download binaries if needed.
+K8S_VERSION will have the latest stable version of Kubernetes. We will configure CoreOS to run this script during boot.
 Now when all files are in place we just need to configure SystemD units to start services.
 
 ```yaml
@@ -318,8 +320,8 @@ coreos:
         RemainAfterExit=yes
         Type=oneshot
 ```
-First one will run our Kubernetes installer, and the second one will create network environment file.
-Which is very helpful in some cases. For example you can have your current IP address as environment variable.
+First, one will run our Kubernetes installer, and the second one will create network environment file.
+Which is very helpful in some cases. For example, you can have your current IP address as an environment variable.
 
 And of course we need to run Kubernetes services:
 
@@ -403,17 +405,17 @@ And of course we need to run Kubernetes services:
 ```
 
 Everything here is relatively simple, and could be found in almost any example of cloud-config. But few things I want to highlight.
-`${DEFAULT_IPV4}` variable is populated by `setup-network-environment.service` we created earlier. We can use either this or our nginx configuration.
-Also I have `--insecure_bind_address=0.0.0.0` inside `kube-apiserver.service`,
-its fine for me since I have isolated network, and my nodes can't be accessed from the internet. Otherwise it should contain your internal IP or localhost.
+`${DEFAULT_IPV4}` variable is populated by `setup-network-environment.service` we created earlier. We can use either this or our Nginx configuration.
+Also, I have `--insecure_bind_address=0.0.0.0` inside `kube-apiserver.service`,
+it's fine for me since I have isolated network, and my nodes can't be accessed from the internet. Otherwise, it should contain your internal IP or localhost.
 
-The last thing, is `--apiserver-count=3`. If you have more than one master, you should set this parameter to avoid problems.
+The last thing is `--apiserver-count=3`. If you have more than one master, you should set this parameter to avoid problems.
 
 Complete cloud-config could be found in [github repository](https://github.com/lwolf/kubernetes-cluster/tree/master/cloud_configs)
 
-That's all for masters. At this stage we can start all 3 master nodes.
-After several minutes you should have working etcd cluster with Kubernetes cluster.
-To check that everything works you can ssh to this nodes and check that etcd works and there is no failed units:
+That's all for masters. At this stage, we can start all 3 master nodes.
+After several minutes, you should have working Etcd cluster with Kubernetes cluster.
+To check that everything works you can ssh to this nodes and check that Etcd works and there are no failed units:
 
 ```
 core@localhost ~ $ etcdctl cluster-health
@@ -426,12 +428,12 @@ core@localhost ~ $ systemctl --failed
 To show all installed unit files use 'systemctl list-unit-files'.
 ```
 
-But we have no minions, only masters. So lets go through configuration of minions.
+But we have no minions, only masters. So let's go through the configuration of minions.
 
 
 #### Configuring minions
 Since we want to have any number of minions and be able to add/remove it at any time, config should be the same for all.
-First of all this means that we need to generate client's ssl certificates during install.
+First of all, this means that we need to generate client's SSL certificates during install.
 
 ```yaml
   - path: /etc/kubernetes/ssl/worker-openssl.cnf
@@ -480,7 +482,7 @@ First of all this means that we need to generate client's ssl certificates durin
       -----END RSA PRIVATE KEY-----
 ```
 
-Also we need to have scripts to check ports and install kubernetes.
+Also we need to have scripts to check ports and install Kubernetes.
 
 ```yaml
   - path: /opt/bin/wupiao
@@ -517,7 +519,7 @@ Also we need to have scripts to check ports and install kubernetes.
       fi
 ```
 
-Also we are going to run etcd on all nodes, but not the same way as on masters, here we will run it in proxy mode
+Also we are going to run Etcd on all nodes, but not the same way as on masters, here we will run it in proxy mode
 More about it on [CoreOS documentation](https://coreos.com/etcd/docs/latest/proxy.html)
 
 ```yaml
@@ -529,15 +531,14 @@ More about it on [CoreOS documentation](https://coreos.com/etcd/docs/latest/prox
 ```
 
 
-
-All SystemD units for minions is self describing and has nothing special.
+All SystemD units for minions is self-describing and has nothing special.
 The only thing worth mentioning is DNS. It took me few days at the beginning to understand this
-chicken-egg problem. Kubernetes by itself has no DNS service, and you should install it afterwards.
-In fact it is really easy - just create service and replication controller from receipts,
+chicken-egg problem. Kubernetes by itself has no DNS service, and you should install it afterward.
+In fact, it is really easy - just create service and replication controller from receipts,
 which you can find in the Kubernetes repository.
-But, you need to decide about your internal domain zone and service IP address of your dns server
+But, you need to decide about your internal domain zone and service IP address of your DNS server
 before you create your minions and write it in your kubelet config.
-So you need minion to deploy dns service, but you need to configure minion to know IP address of the future DNS.
+So you need a minion to deploy DNS service, but you need to configure minion to know IP address of the future DNS.
 
 ```
     ExecStart=/opt/bin/kubelet \
@@ -554,12 +555,12 @@ Complete cloud-config for minions could be found [on github](https://github.com/
 # Checking that everything works
 To check that everything works we need to install `kubectl` tool to be able to talk to our cluster.
 
-There are two ways you can talk to your cluster - first is secured channel using ssl keys we generated
+There are two ways you can talk to your cluster - first is secured channel using SSL keys we generated
 earlier. Second one using insecure port 8080, but only in case you configured kube-apiserver
-to listen anything other than localhost.
+to listen to anything other than localhost.
 
 This is perfectly described at [documentation](https://coreos.com/kubernetes/docs/latest/configure-kubectl.html)
-After following documentation you should be able to execute `kubectl` command and have config at `~/.kube/config` with something like this:
+After the following documentation you should be able to execute `kubectl` command and have config at `~/.kube/config` with something like this:
 
 ```
 apiVersion: v1
@@ -586,11 +587,11 @@ current-context: dev
 Now, if you run `kubectl get nodes` you should get back a list of your nodes with IP addresses.
 If not - something went wrong and you should check the logs and try to fix it :)
 
-Of course feel free to ping me and I'll try to help.
+Of course, feel free to ping me and I'll try to help.
 
 Since its already a huge post, I'm going to finish it here.
-At this point we have fully operational cluster with several masters and several minions.
-In the next post I will walk through deploying some basic services like: dns, heapster and dashboards.
+At this point, we have a fully operational cluster with several masters and several minions.
+In the next post, I will walk through deploying some basic services like DNS, heapster and dashboards.
 
 
 ## Problems during deploy
@@ -736,8 +737,8 @@ Some of solutions:
 
 ### Fleet engine stops and all pods are moved from the node
 After I moved all my containers to production cluster I started to see strange things.
-Everyday, at least once a day, all containers were moved from one random node to others.
-After some debugging and monitoring I found that issue was in fleet service.
+Every day, at least once a day, all containers were moved from one random node to others.
+After some debugging and monitoring, I found that issue was in fleet service.
 And also I found great blog post describing how to fix this problem
 
  * http://blog.feedpresso.com/2015/10/16/tuning-fleet-and-etcd-on-coreos-to-avoid-unit-failures.html
@@ -745,7 +746,7 @@ And also I found great blog post describing how to fix this problem
 
 
 One hint, which is kind of obvious, but in fact it saved me a lot of time.
-Since you will create/destroy CoreOS instances tens of times - add this block to your ssh config to avoid deleting hosts from known_hosts file.
+Since you will create/destroy CoreOS instances tens of times - add this block to your ssh config to avoid deleting hosts from the known_hosts file.
 
 ```
  Host 10.10.30.*
