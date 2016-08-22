@@ -7,7 +7,7 @@ featured = "coreos-baremetal.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
-draft = true
+draft = false
 title = "Bootstrapping CoreOS cluster with Kubernetes in 20 minutes using coreos-baremental and bootkube"
 
 +++
