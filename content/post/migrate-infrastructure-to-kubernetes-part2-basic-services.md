@@ -1,6 +1,6 @@
 +++
 author = "Sergey Nuzhdin"
-categories = ["kubernetes", "docker", "infrastructure"]
+categories = ["kubernetes", "docker", "infrastructure", "k8s"]
 date = "2016-06-20"
 description = "Deploying DNS and dashboards to Kubernetes cluster"
 featured = "kubedash.png"

@@ -1,6 +1,6 @@
 +++
 author = "Sergey Nuzhdin"
-categories = ["docker", "infrastructure", "kubernetes", "coreos"]
+categories = ["docker", "infrastructure", "kubernetes", "coreos", "k8s"]
 date = "2016-06-08"
 description = "Migrating infrastructure to CoreOS based Kubernetes cluster."
 featured = "kubernetes.png"
