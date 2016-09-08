@@ -8,20 +8,9 @@ featuredalt = ""
 featuredpath = "date"
 linktitle = ""
 draft = true
-title = "Move infrastructure to Kubernetes. LoadBalancing."
+title = "Migrate infrastructure to Kubernetes. Staging/Testing infrastucture."
 
 +++
-
-
-<!-- more -->
-
-
-# Configuring ingress and loadbalancing
-```
-kubectl create -f ./ingress-lb/default-backend.yaml
-kubectl expose rc default-http-backend --port=80 --target-port=8080 --name=default-http-backend
-kubectl create -f ./ingress-lb/nginx-ingress-daemonset.yaml
-```
 
 
 # Testing/Staging environment
@@ -34,3 +23,6 @@ kubectl create -f ./ingress-lb/nginx-ingress-daemonset.yaml
 
 ## create repositories and build jobs
 ## Configure autobuild/autodeploy to staging
+
+<!-- more -->
+
