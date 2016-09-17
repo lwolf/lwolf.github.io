@@ -1,6 +1,6 @@
 +++
 author = "Sergey Nuzhdin"
-categories = ["docker", "infrastructure", "kubernetes", "k8s", "ci/cd", "gitlab"]
+categories = ["docker", "infrastructure", "kubernetes", "k8s", "ci/cd", "gitlab", "devops"]
 date = "2016-09-08"
 description = ""
 featured = "k8s-gitlab.png"
