@@ -57,7 +57,10 @@ relativeURLs = true
     name = "About"
     url = "/about"
     weight = 3
-
+[[menu.main]]
+    name = "Subscribe"
+    url = "http://eepurl.com/cdUha1"
+    weight = 4
 
 # Insert your username and the icon will apear on the page as long as
 # socialAppearAtTop or socialAppearAtBottom is set to true in the params area
