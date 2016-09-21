@@ -10,7 +10,7 @@ relativeURLs = true
 
 [params]
     # Sets the meta tag description, usually reserved for the main page
-    description = "Blog about python, docker, kubernetes and other stuff..,"
+    description = "Blog about python, docker, ci/cd, kubernetes and similar stuff,"
     # This will appear on the top left of the navigation bar
     navbarTitle = "lwolfs blog"
     # Social media buttons that appear on the sidebar
@@ -29,7 +29,7 @@ relativeURLs = true
     faviconVersion       = ""
     [params.intro]
     header    = "LWOLFS BLOG"
-    paragraph = "Another blog about dev and devops stuff, mostly about python, docker, kubernetes, etc"
+    paragraph = "Blog about dev and ops stuff, mostly about python, docker, kubernetes, CI/CD, etc"
     about     = "Some about me text..."
 
 [params.intro.pic]
