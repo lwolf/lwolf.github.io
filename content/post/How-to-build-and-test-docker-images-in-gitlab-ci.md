@@ -2,12 +2,11 @@
 author = "Sergey Nuzhdin"
 categories = ["docker", "infrastructure", "ci/cd", "gitlab", "devops"]
 date = "2016-09-21"
-description = ""
+description = "How to configure GitLab CI to build,test and release python containers with javascript and webpack."
 featured = "gitlab-ci.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
-draft = true
 title = "How to build and test docker images in GitLab CI."
 
 +++

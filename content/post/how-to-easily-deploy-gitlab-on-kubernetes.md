@@ -2,7 +2,7 @@
 author = "Sergey Nuzhdin"
 categories = ["docker", "infrastructure", "kubernetes", "k8s", "ci/cd", "gitlab", "devops"]
 date = "2016-09-08"
-description = ""
+description = "How to easily deploy GitLab with GitLab CI to Kubernetes cluster"
 featured = "k8s-gitlab.png"
 featuredalt = ""
 featuredpath = "date"
