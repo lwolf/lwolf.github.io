@@ -104,7 +104,7 @@ After this, it applies new manifests.
 
 ## Updating GitLab-CI
 
-To automate this step we need to add 2 stages to our `.gitlab-ci` file. Original file could be found in my previous [post](post/How-to-build-and-test-docker-images-in-gitlab-ci/)
+To automate this step we need to add 2 stages to our `.gitlab-ci` file. Original file could be found in my previous [post](/post/How-to-build-and-test-docker-images-in-gitlab-ci/)
 
 ```
 variables:
