@@ -7,7 +7,6 @@ featured = "ironfunctions.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
-draft = true
 title = "How to run Functions in your Kubernetes cluster"
 
 +++
