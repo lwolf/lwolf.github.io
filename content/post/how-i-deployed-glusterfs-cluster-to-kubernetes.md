@@ -300,7 +300,7 @@ More details about StorageClass entity could be found [here](https://kubernetes.
 
     > $ kubectl create -f storage-class.yml
 
-# Create dynamic PersistantVolumeClaim
+# Create dynamic PersistentVolumeClaim
 
 Finally, we can create PVC to test that everything works.
 
@@ -336,7 +336,7 @@ After two days of struggle, I finally got it working.
 It was definitely worth it.
 
 I already tried to use it to create dynamic volumes for different helm charts and it works pretty well.
-Now I can forget about manual creating of PersistantVolumes.
+Now I can forget about manual creating of PersistentVolumes.
 
 With this features bare-metal cluster became closer to cloud-based ones, at least storage-wise.
 
