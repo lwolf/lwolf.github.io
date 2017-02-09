@@ -219,7 +219,8 @@ ______
 I had one more issue, but it was due to a misconfiguration in my DNS server.
 
 
-    > $ heketi-cli setup-openshift-heketi-storage                                         Error: Unable to execute command on glusterfs-szljx: volume create: heketidbstorage: failed: Staging failed on server-node-01. Error: Host server-node-03 not connected
+    > $ heketi-cli setup-openshift-heketi-storage
+    Error: Unable to execute command on glusterfs-szljx: volume create: heketidbstorage: failed: Staging failed on server-node-01. Error: Host server-node-03 not connected
 
 **Workaround/Solution**: Make sure that all GlusterFS pods can resolve and ping each other.
 
