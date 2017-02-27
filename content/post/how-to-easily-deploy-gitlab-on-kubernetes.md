@@ -23,6 +23,11 @@ with GitLab Runner, up and running on top of Kubernetes.
 
 All manifests used in this post could be found [here](https://github.com/lwolf/kubernetes-gitlab)
 
+> Update 2017-02-27:
+>
+> You may be interested in **automated version** of this manifests
+>
+> http://blog.lwolf.org/post/fully-automated-gitlab-installation-on-kubernetes-including-runner-and-registry/
 
 ## Prerequisites:
 
