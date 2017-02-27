@@ -125,7 +125,7 @@ $ helm install -f values-test.yaml . --namespace=gitlab
 ```
 
 watch `kubectl get pods --namespace=gitlab --watch` for the progress. 
-Complete installation takes aroute 5 minutes. I found the next script very useful:
+Complete installation takes around 5 minutes. I found the next script very useful:
 ```bash
 $ while ! curl --output /dev/null --silent --head --fail https://gitlab.example.com/help; do sleep 1 && echo -n .; done
 ................
@@ -143,7 +143,7 @@ The chart will generate a random password on each run. You can override this beh
 
 ## GitLab CI multi runner {#runner}
 
-I spent some time trying to automate GitLab runner creating. It seems that it’s impossible now due to some limitations at GitlLab side. 
+I spent some time trying to automate GitLab runner creating. It seems that it’s impossible now due to some limitations at GitLab side. 
 
 But I was able to semi-automate it. 
 Instead of running registration of runner after the installation manually, I’m doing it as a part of the installation process.
@@ -232,7 +232,7 @@ Certificates will be mounted in both gitlab and registry pods to the directory `
 
 After the installation, you can clone test repository and open registry tab. You should be able to log in and push images to this repository.
 
-{{< figure src="/img/2017/02/gitlab-registry.png" alt="Gitlab registry page" >}}
+{{< figure src="/img/2017/02/gitlab-registry-page.png" alt="Gitlab registry page" >}}
 
 ## Advanced settings {#advanded}
 
