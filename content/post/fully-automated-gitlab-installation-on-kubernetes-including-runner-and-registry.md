@@ -7,7 +7,6 @@ featured = "k8s-gitlab.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
-draft = true
 title = "Fully automated GitLab installation on Kubernetes including runner and docker registry"
 
 +++
