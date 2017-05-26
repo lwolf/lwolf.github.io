@@ -62,9 +62,9 @@ This post consists of a few blocks. Each block describes the minimum configurati
 First of all, you need to clone my repository with the chart.
 ```bash
 $ git clone https://github.com/lwolf/gitlab-chart
-$ cd gitlab-chart
+$ cd gitlab-chart/gitlab
 # Make a copy of the original values files
-$ cp chart/values.yaml values-test.yaml
+$ cp values.yaml values-test.yaml
 ```
 
 If you open this values file you may notice a few important sections: 
@@ -118,6 +118,10 @@ This is the minimum config you need to write in your `values-test.yaml` to deplo
 Let’s try to install it.
 
 ```bash
+# add repository (needed for dependencies)
+$ helm repo add lwolf-charts http://charts.lwolf.org
+# get dependencies
+$ helm dep build
 # First run it with --debug --dry-run to check that everything is fine.
 $ helm install -f values-test.yaml . --namespace=gitlab --debug --dry-run
 # Next install it.
@@ -278,10 +282,19 @@ All settings have the same name as in [sameersbn/docker-gitlab image](https://gi
 ## TL;DR; {#tldr}
 
 To install GitLab with registry and runner you need to do the following:
+
+### Manual way (with clonning github-repository)
 ```bash
+# add repository (needed for dependencies)
+$ helm repo add lwolf-charts http://charts.lwolf.org
+
 $ git clone https://github.com/lwolf/gitlab-chart
-$ cd gitlab-chart# copy values file from example directory
-$ cp examples/values-test.yaml .# edit your values-test.yaml file.
+$ cd gitlab-chart/gitlab
+# get dependencies
+$ helm dep build
+# copy values file
+$ cp values.yaml values-test.yaml
+# edit your values-test.yaml file.
 
 # Install it as usual
 $ helm install -f values-test.yaml . --namespace=gitlab
@@ -293,6 +306,27 @@ $ while ! curl --output /dev/null --silent --head --fail https://gitlab.example.
 # Open gitlab runner configuration and check that Runner is successfully registered.
 # Copy token and run upgrade.
 $ helm upgrade -f values-test.yaml --set runner.token=<TOKEN> <install-name> . --namespace=gitlab
+```
+
+### Automatic way (installation directly from the chart-repository)
+
+```bash
+# add repository (needed for dependencies)
+$ helm repo add lwolf-charts http://charts.lwolf.org
+
+# get default values.yaml file
+$ curl https://raw.githubusercontent.com/lwolf/gitlab-chart/master/gitlab/values.yaml -o values-test.yaml
+
+# install
+$ helm install -f values-test.yaml lwolf-charts/gitlab
+# Wait until gitlab is up and running.
+$ while ! curl --output /dev/null --silent --head --fail https://gitlab.example.com/help; do sleep 1 && echo -n .; done
+...................................................
+
+# Open gitlab runner configuration and check that Runner is successfully registered.
+# Copy token and run upgrade.
+$ helm upgrade -f values-test.yaml --set runner.token=<TOKEN> <install-name> lwolf-charts/gitlab --namespace=gitlab
+
 ```
 
 
