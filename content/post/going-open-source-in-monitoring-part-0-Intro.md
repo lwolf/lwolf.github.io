@@ -11,7 +11,8 @@ title = "Going open-source in monitoring, part 0: Intro"
 +++
 
 0. **Intro (this article)**
-1. Deploy and basic configuration of Prometheus
+
+1. [Deploy and basic configuration of Prometheus](/post/going-open-source-in-monitoring-part-I-deploying-prometheus-and-grafana-to-kubernetes/)
 2. Create first dashboard in Grafana
 3. Configuring alerts in Prometheus and Grafana
 4. Making sense of logs with ELK stack and Sentry
