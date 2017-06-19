@@ -10,6 +10,19 @@ linktitle = ""
 title = "Going open-source in monitoring, part I: Deploying Prometheus and Grafana to Kubernetes"
 +++
 
+This post is one of a series of posts about monitoring of infrastructure and services. Other posts in the series:
+
+
+0. **[Intro](/post/going-open-source-in-monitoring-part-0-Intro/)**
+1. **Deploying Prometheus and Grafana to Kubernetes** (this article)
+2. **[Creating the first dashboard in Grafana](/post/going-open-source-in-monitoring-part-ii-creating-the-first-dashboard-in-grafana)**
+3. 10 most useful Grafana dashboards to monitor Kubernetes and services
+4. Configuring alerts in Prometheus and Grafana
+5. Making sense of logs with ELK(EFK) stack and Sentry
+6. Replacing commercial APM monitoring
+
+<hr />
+
 I’ve been keeping my eye on [Prometheus](https://prometheus.io/) for some time.  What I like about it - is its pull nature and great integration with service discovery and Kubernetes.
 
 With pull system, you do not have to tell every service you have where the monitoring system is located. You just need to expose your metrics as a plain text using HTTP and Prometheus will access this endpoint and pull the data. The system will never fail because your monitoring service ran out of space or overloaded.
@@ -26,17 +39,6 @@ The Prometheus system consists of several components:
 - Exporters which expose metrics for well-known services
 - Alertmanager to send notifications and alerts on events
 - Push gateway, client libraries to build custom monitoring solutions.
-
-<br/><br/><br/>
- This post is one of a series of posts about monitoring of infrastructure and services. Other posts in the series:
-
-
-1. **[Intro](/post/going-open-source-in-monitoring-part-0-Intro/)**
-2. **Deploying Prometheus and Grafana to Kubernetes** (this article)
-3. Creating dashboard in Grafana
-4. Configuring alerts in Prometheus and Grafana
-5. Making sense of logs with ELK stack and Sentry
-6. Replacing commercial APM monitoring
 
 # Planning resources
 

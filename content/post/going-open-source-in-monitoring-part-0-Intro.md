@@ -10,13 +10,14 @@ linktitle = ""
 title = "Going open-source in monitoring, part 0: Intro"
 +++
 
-0. **Intro (this article)**
 
-1. [Deploy and basic configuration of Prometheus](/post/going-open-source-in-monitoring-part-I-deploying-prometheus-and-grafana-to-kubernetes/)
-2. Create first dashboard in Grafana
-3. Configuring alerts in Prometheus and Grafana
-4. Making sense of logs with ELK stack and Sentry
-5. Replacing commercial APM monitoring
+0. **Intro (this article)**
+1. **[Deploy and basic configuration of Prometheus](/post/going-open-source-in-monitoring-part-i-deploying-prometheus-and-grafana-to-kubernetes/)**
+2. **[Creating the first dashboard in Grafana](/post/going-open-source-in-monitoring-part-ii-creating-the-first-dashboard-in-grafana)**
+3. 10 most useful Grafana dashboards to monitor Kubernetes and services
+4. Configuring alerts in Prometheus and Grafana
+5. Making sense of logs with ELK(EFK) stack and Sentry
+6. Replacing commercial APM monitoring
 
 
 Monitoring of the infrastructure is an essential part of any product. But it's not uncommon for companies to postpone monitoring for the later period. Having it in "nice-to-have" bucket. That's one of the reasons why they spend a lot of time reacting to the problems after service disruption. The uptime of the infrastructure is as important to the product as the product itself.
