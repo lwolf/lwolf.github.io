@@ -88,8 +88,9 @@ To run golang tests with coverage reports I’m using the variation of this [she
 
 ## Deploy stage
 
-I don’t use native Gitlab’s integration with Kubernetes. 
-I don’t use native Gitlab’s integration with Kubernetes. First I thought about creating Kubernetes secrets and mounting it to the gitlab-runner pod. But it’s very complicated. You need to upgrade deployment every time you want to add new cluster configuration. So I’m using GitLab’s CI/CD variables with base64 encoded Kubernetes config. Each project can have any number of configurations. 
+I don’t use native Gitlab’s integration with Kubernetes.
+
+First I thought about creating Kubernetes secrets and mounting it to the gitlab-runner pod. But it’s very complicated. You need to upgrade deployment every time you want to add new cluster configuration. So I’m using GitLab’s CI/CD variables with base64 encoded Kubernetes config. Each project can have any number of configurations.
 Process is easy - create base64 string from the config and copy it to the clipboard. After this, put it into `kube_config` variable (name it whatever you like).
 
 `cat ~/.kube/config | base64 | pbcopy` 
