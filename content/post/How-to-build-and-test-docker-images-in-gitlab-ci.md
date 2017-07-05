@@ -8,6 +8,9 @@ featuredalt = ""
 featuredpath = "date"
 linktitle = ""
 title = "How to build and test docker images in GitLab CI."
+aliases = [
+    "/post/How-to-build-and-test-docker-images-in-gitlab-ci/"
+]
 
 +++
 

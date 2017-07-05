@@ -8,6 +8,10 @@ featuredalt = ""
 featuredpath = "date"
 linktitle = ""
 title = "Going open-source in monitoring, part I: Deploying Prometheus and Grafana to Kubernetes"
+aliases = [
+    "/post/going-open-source-in-monitoring-part-I-deploying-prometheus-and-grafana-to-kubernetes/"
+]
+
 +++
 
 This post is one of a series of posts about monitoring of infrastructure and services. Other posts in the series:
