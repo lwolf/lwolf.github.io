@@ -12,7 +12,7 @@ title = "Going open-source in monitoring, part II: Creating the first dashboard 
 
 This post is one of a series of posts about monitoring of infrastructure and services. Other posts in the series:
 
-0. **[Intro](/post/going-open-source-in-monitoring-part-0-Intro/)**
+0. **[Intro](/post/going-open-source-in-monitoring-part-0-intro/)**
 1. **[Deploying Prometheus and Grafana to Kubernetes](/post/going-open-source-in-monitoring-part-i-deploying-prometheus-and-grafana-to-kubernetes/)**
 2. **Creating the first dashboard in Grafana** (this article)
 3. 10 most useful Grafana dashboards to monitor Kubernetes and services
