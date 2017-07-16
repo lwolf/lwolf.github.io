@@ -1,0 +1,21 @@
+addons:
+  apt:
+    packages:
+      - python-pygments
+
+install:
+
+script:
+  - rm -rf public || exit 0
+  - bin/hugo-linux64 --theme=hugo-future-imperfect
+  - cp robots.txt public/robots.txt
+
+deploy:
+  provider: pages
+  skip_cleanup: true
+  local_dir: public
+  fqdn: blog.lwolf.org
+  target_branch: master
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  on:
+    branch: source
