@@ -20,7 +20,7 @@ This post is one of a series of posts about monitoring of infrastructure and ser
 0. **[Intro](/post/going-open-source-in-monitoring-part-0-intro/)**
 1. **Deploying Prometheus and Grafana to Kubernetes** (this article)
 2. **[Creating the first dashboard in Grafana](/post/going-open-source-in-monitoring-part-ii-creating-the-first-dashboard-in-grafana)**
-3. 10 most useful Grafana dashboards to monitor Kubernetes and services
+3. **[10 most useful Grafana dashboards to monitor Kubernetes and services](http://blog.lwolf.org/post/going-open-source-in-monitoring-part-iii-10-most-useful-grafana-dashboards-to-monitor-kubernetes-and-services/)**
 4. Configuring alerts in Prometheus and Grafana
 5. Making sense of logs with ELK(EFK) stack and Sentry
 6. Replacing commercial APM monitoring

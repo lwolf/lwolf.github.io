@@ -10,6 +10,20 @@ linktitle = ""
 title = "Going open-source in monitoring, part III: 10 most useful Grafana dashboards to monitor Kubernetes and services"
 +++
 
+This post is one of a series of posts about monitoring of infrastructure and services. Other posts in the series:
+
+0. **[Intro](/post/going-open-source-in-monitoring-part-0-intro/)**
+1. **[Deploying Prometheus and Grafana to Kubernetes](/post/going-open-source-in-monitoring-part-i-deploying-prometheus-and-grafana-to-kubernetes/)**
+2. **[Creating the first dashboard in Grafana](/post/going-open-source-in-monitoring-part-ii-creating-the-first-dashboard-in-grafana/)** 
+3. **10 most useful Grafana dashboards to monitor Kubernetes and services** (this article)
+4. Configuring alerts in Prometheus and Grafana
+5. Making sense of logs with ELK(EFK) stack and Sentry
+6. Replacing commercial APM monitoring
+
+<hr />
+
+
+
 There are dozens of ready dashboards available on [grafana.net/dashboards](https://grafana.net/dashboards) and Github.
 Many of them just work, but many do not. In most cases, you just need to fix template variables, but some require deeper involvement. 
 For example [dashboard](https://grafana.com/dashboards/455) for PostgreSQL monitoring. After import, it welcomes you with the error message “Datasource named ${DS_PROMETHEUS} was not found”. Setting the correct datasource name in dashboard settings does not help because it has an error in `__inputs`  declaration. The easiest way to fix it is to edit JSON before import.

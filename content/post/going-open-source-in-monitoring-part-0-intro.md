@@ -15,10 +15,10 @@ aliases = [
 +++
 
 
-0. **Intro (this article)**
+0. **Intro** (this article)
 1. **[Deploy and basic configuration of Prometheus](/post/going-open-source-in-monitoring-part-i-deploying-prometheus-and-grafana-to-kubernetes/)**
 2. **[Creating the first dashboard in Grafana](/post/going-open-source-in-monitoring-part-ii-creating-the-first-dashboard-in-grafana)**
-3. 10 most useful Grafana dashboards to monitor Kubernetes and services
+3. **[10 most useful Grafana dashboards to monitor Kubernetes and services](http://blog.lwolf.org/post/going-open-source-in-monitoring-part-iii-10-most-useful-grafana-dashboards-to-monitor-kubernetes-and-services/)**
 4. Configuring alerts in Prometheus and Grafana
 5. Making sense of logs with ELK(EFK) stack and Sentry
 6. Replacing commercial APM monitoring
