@@ -77,7 +77,7 @@ Pod level monitoring. Shows mostly the same stats as the deployment dashboard bu
 
 *Kubernetes App Metrics -* [#1471](https://grafana.com/dashboards/1471)
 
-{{< figure src="/img/2017/07/pod-metrics-min.png"  alt="Kubernetes App Metrics" >}}
+{{< figure src="/img/2017/07/app-metrics-min.png"  alt="Kubernetes App Metrics" >}}
 
 
 This one is good as an example of how to monitor your application deployed to Kubernetes. It has metrics like `request rate`, `error rate` and `response times` for your application alongside with different resource usage stats. 
