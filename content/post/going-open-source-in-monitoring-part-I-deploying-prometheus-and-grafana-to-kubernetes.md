@@ -71,7 +71,7 @@ Now, we need to create a configuration file for our chart. To not start from scr
 
     $ mkdir prometheus && cd prometheus
     # save the default values
-    $ wget https://github.com/kubernetes/charts/blob/master/stable/prometheus/values.yaml
+    $ wget https://raw.githubusercontent.com/kubernetes/charts/master/stable/prometheus/values.yaml
 
 This file consists of a several parts: 
 
@@ -292,7 +292,7 @@ Let’s grab default values config and update it a little.
 
 
     > $ mkdir grafana && cd grafana
-    > $ wget https://github.com/kubernetes/charts/blob/master/stable/grafana/values.yaml
+    > $ wget https://raw.githubusercontent.com/kubernetes/charts/master/stable/grafana/values.yaml
 
 Similar to the Prometheus setup we’re going to configure ingress. But in this case, it should be accessible to the outside world.
 

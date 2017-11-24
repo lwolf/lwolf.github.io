@@ -110,7 +110,6 @@ Adding Sentry to Scrapy is similar. Just add a few settings to the config after 
 Integration with client-side JS or with backend-side is easy. Making it work in Universal App is a bit trickier. As a solution for [ReactStarterKit based](https://github.com/kriasoft/react-starter-kit) project, I end up with something like this.
 
 
-![](https://d2mxuefqeaa7sj.cloudfront.net/s_9E7BCE9EE421F38EC83DE1E3A452DF4B8B477BDB643BECF47CD2F51F6CF47A29_1504588134913_Screenshot+2017-09-05+07.08.17.png)
 {{< figure src="/img/2017/09/frontend-sentry-package.png"  alt="Frontend sentry package" >}}
 
 Have a package named raven which imports either `raven.client.js` or `raven.server.js` based on environment. 
@@ -134,6 +133,7 @@ And then use it the same way in both `server.js` and `client.js`
     func init() {
         raven.SetDSN("https://<key>:<secret>@sentry.io/<project>")
     }
+
 # Integrations
 
 Sentry supports more than 25 integrations with other platforms, for now, I’m going to enable only two: gitlab and slack.
@@ -143,7 +143,7 @@ In Sentry, you can enable a different set of apps for each project. To do it you
 
 ## Gitlab
 
-After enabling Gitlab you need to configure it. You will need to [create an](https://docs.gitlab.com/ce/user/profile/personal_access_tokens.html) [**Access Token**](https://docs.gitlab.com/ce/user/profile/personal_access_tokens.html) ****in Gitlab and enter it in the Configuration page of Sentry.
+After enabling Gitlab you need to configure it. You will need to [create an **Access Token**](https://docs.gitlab.com/ce/user/profile/personal_access_tokens.html) in Gitlab and enter it in the Configuration page of Sentry.
 
 
 {{< figure src="/img/2017/09/gitlab-integration.png"  alt="Gitlab Configuration in Sentry" >}}
