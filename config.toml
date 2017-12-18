@@ -1,4 +1,4 @@
-baseurl = "http://blog.lwolf.org"
+baseurl = "https://blog.lwolf.org"
 languageCode = "en-us"
 title = "lwolfs blog"
 theme = "hugo-future-imperfect"
