@@ -29,7 +29,7 @@ relativeURLs = true
     faviconVersion       = ""
     [params.intro]
     header    = "LWOLFS BLOG"
-    paragraph = "Blog about dev and ops stuff, mostly about python, docker, kubernetes, CI/CD, etc"
+    paragraph = "Blog about dev and ops stuff, mostly cloud-native, containers, kubernetes, CI/CD, etc"
     about     = "Some about me text..."
 
 [params.intro.pic]
