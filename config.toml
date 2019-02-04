@@ -25,7 +25,7 @@ relativeURLs = true
     # The set of favicons used are based on the write-up from this link:
     # https://github.com/audreyr/favicon-cheat-sheet
     # Please see the favicon partial template for more information
-    loadFavicon          = false
+    loadFavicon          = true
     faviconVersion       = ""
     [params.intro]
     header    = "LWOLFS BLOG"
