@@ -86,7 +86,7 @@ Previously I had to do such changes all over the place.
 The main choice one has to make is what overlay network to use. 
 Here are the main options I considered:
 
-* ***cilium*** was my first choice. I heard a lot of great stuff about it and for a long time, I want to try it on a real system. Unfortunately, it [does not support ARM yet](http://ARM support for Cilium · Issue #1104 · cilium/cilium).
+* ***cilium*** was my first choice. I heard a lot of great stuff about it and for a long time, I want to try it on a real system. Unfortunately, it [does not support ARM yet](https://github.com/cilium/cilium/issues/1104).
 * **calico** -  is another popular solution which I didn’t try yet. But, again, as far as I can tell, it still does not support multi-arch containers, but they are [working on it](https://github.com/projectcalico/calico/issues/1865). [**UPDATE**: the ticket is closed now, and you can use it on amd64/arm64 and ppc64 architectures.]
 * ***flannel***  - I’ve been using flannel in most of my k8s clusters for a few years now and it turned out that I’m gonna use it for a much longer period. It is the only CNI that supports all the architectures. Well, maybe not all, but all architectures that I would ever need.
 
