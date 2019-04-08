@@ -202,7 +202,7 @@ You can install cert-manager as part of istio chart or you can use a dedicated c
         kind: ClusterIssuer
       commonName: '*.example.com'
       dnsNames:
-      - srvho.me
+      - example.com
       acme:
         config:
         - dns01:
