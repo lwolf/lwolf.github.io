@@ -8,6 +8,7 @@ featuredalt = ""
 featuredpath = "date"
 linktitle = ""
 draft = false
+images = ["img/2019/01/infra_cover.jpg"]
 title = "Home Lab Infrastructure Overview"
 
 +++

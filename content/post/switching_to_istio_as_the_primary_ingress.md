@@ -3,10 +3,11 @@ author = "Sergey Nuzhdin"
 categories = ["kubernetes", "k8s", "service-mesh", "istio", "ingress"]
 date = "2019-04-08"
 description = "Switching to Istio as the primary ingress"
-featured = "virtualservices-destrules.svg"
+featured = "virtualservices-destrules.png"
 featuredalt = "image source: https://istio.io/blog/2018/v1alpha3-routing/"
 featuredpath = "date"
 linktitle = ""
+images = ["img/2019/04/virtualservices-destrules.png"]
 draft = false
 title = "Switching to Istio as the primary ingress"
 

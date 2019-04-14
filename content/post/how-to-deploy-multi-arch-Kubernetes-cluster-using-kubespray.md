@@ -7,6 +7,7 @@ featured = "kubespray-logo.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+images = ["img/2019/02/kubespray-logo.png"]
 title = "How to deploy multi-arch Kubernetes cluster using Kubespray"
 +++
 
