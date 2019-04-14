@@ -98,7 +98,7 @@ some of the questions one may have at this point are:
 The Ingress controller is, basically, a reverse-proxy that runs in a cluster and configures routing rules according to Ingress resources. 
 Istio provides two ways of ingressing traffic into your cluster.  
 
-First one, **istio-ingress**, is a traditional ingress controller like nginx-ingress, traefik or controur. 
+First one, **istio-ingress**, is a traditional ingress controller like [nginx-ingress](https://github.com/kubernetes/ingress-nginx), [traefik](https://github.com/containous/traefik) or [controur](https://github.com/heptio/contour). 
 This controller runs in your cluster and listens to all the changes to Ingress resources from the Kubernetes API and sends incoming traffic according to these rules. 
 You can easily swap one ingress controller to another by just changing the annotation on your ingress objects:
 

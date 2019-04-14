@@ -155,7 +155,7 @@ Thanks to the manifest-based flannel container, I removed my custom one-per-arch
 
 ## Upgrading K8S versions
 
-During the time have this setup, a few versions of Kubernetes were released. So I had a good chance to test upgrades between releases. I started with v1.12 and went through the upgrades up to v1.12.5. In general, everything went well, I didn’t have any problems with the core components. The only thing that was causing provision to fail from time to time was nginx-ingress-controller provided by Kubespray. For some reason, Kubespray is trying to delete it and reinstall each time. I ended up disabling it and other charts.  I wasn’t planning on managing helm charts with Kubespray anyways. I find this workflow a bit strange: Ansible variables -> jinja -> helm templates -> helm install.
+During the time have this setup, a few versions of Kubernetes were released. So I had a good chance to test upgrades between releases. I started with v1.12 and went through the upgrades up to v1.12.5. In general, everything went well, I didn’t have any problems with the core components. The only thing that was causing provision to fail from time to time was [nginx-ingress-controller](https://github.com/kubernetes/ingress-nginx) provided by Kubespray. For some reason, Kubespray is trying to delete it and reinstall each time. I ended up disabling it and other charts.  I wasn’t planning on managing helm charts with Kubespray anyways. I find this workflow a bit strange: Ansible variables -> jinja -> helm templates -> helm install.
 
 After this change, updates became stable.
 

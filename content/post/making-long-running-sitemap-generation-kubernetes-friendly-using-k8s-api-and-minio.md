@@ -11,7 +11,7 @@ title = "Making long running sitemap generation kubernetes-friendly using k8s-ap
 
 +++
 
-Generation of sitemaps is usually not a problem, at least not until you have several millions of items in the database to iterate through. Currently, I have slightly more than 4M documents, so it takes time to regenerate. Previously all my sitemaps were stored on the disk and were served using simple Nginx container.
+Generation of sitemaps is usually not a problem, at least not until you have several millions of items in the database to iterate through. Currently, I have slightly more than 4M documents, so it takes time to regenerate. Previously all my sitemaps were stored on the disk and were served using simple [Nginx](https://nginx.org) container.
 It worked like this:
 
 - Sitemap-related containers have nodeSelector to assign to particular node with hostPath volume
