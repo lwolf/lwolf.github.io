@@ -7,6 +7,7 @@ featured = "golang_docker_gitlab.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "How to build tiny Golang docker images with Gitlab-CI"
 
 +++

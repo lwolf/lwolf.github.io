@@ -7,6 +7,7 @@ featured = "gitlab-ci.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "How to build and test docker images in GitLab CI."
 aliases = [
     "/post/How-to-build-and-test-docker-images-in-gitlab-ci/"

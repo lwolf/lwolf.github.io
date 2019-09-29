@@ -7,6 +7,7 @@ featured = "k8s-gitlab.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "How to easily deploy GitLab on Kubernetes"
 
 +++

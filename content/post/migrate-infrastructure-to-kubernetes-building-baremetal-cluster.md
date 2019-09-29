@@ -7,6 +7,7 @@ featured = "kubernetes.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "Migrate infrastructure to Kubernetes: Building baremetal cluster"
 
 +++

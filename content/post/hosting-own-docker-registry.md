@@ -7,6 +7,7 @@ featured = "private-containers.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "Hosting own docker registry with UI and tls"
 
 +++

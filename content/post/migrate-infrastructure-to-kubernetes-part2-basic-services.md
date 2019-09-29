@@ -7,6 +7,7 @@ featured = "kubedash.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "Migrate infrastructure to K8s. Part 2. Basic services."
 
 +++

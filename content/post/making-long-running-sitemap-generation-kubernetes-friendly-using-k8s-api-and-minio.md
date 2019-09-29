@@ -7,6 +7,7 @@ featured = "make-app-cloud-native.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "Making long running sitemap generation kubernetes-friendly using k8s-api and Minio"
 
 +++

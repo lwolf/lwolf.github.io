@@ -7,6 +7,7 @@ featured = "glusterkube.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "Two days of pain or how I deployed GlusterFS cluster to Kubernetes"
 
 +++

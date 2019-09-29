@@ -7,6 +7,7 @@ featured = "dashboard.jpg"
 featuredalt = "https://www.flickr.com/photos/xmodulo/24311604930"
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "Going open-source in monitoring, part 0: Intro"
 aliases = [
     "/post/going-open-source-in-monitoring-part-0-Intro/"

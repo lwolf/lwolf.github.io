@@ -7,6 +7,7 @@ featured = "gitlab-ci-environments.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "Continuous deployment to Kubernetes from GitLab-CI."
 
 +++

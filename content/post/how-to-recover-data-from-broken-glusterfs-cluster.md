@@ -7,6 +7,7 @@ featured = "gluster-recovery.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "How to recover data from broken GlusterFS cluster"
 
 +++

@@ -7,6 +7,7 @@ featured = "sentry-overview.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "Going open-source in monitoring, part V: Collecting errors from production using Sentry"
 +++
 

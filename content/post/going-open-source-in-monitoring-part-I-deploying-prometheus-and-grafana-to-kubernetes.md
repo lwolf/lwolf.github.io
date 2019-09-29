@@ -7,6 +7,7 @@ featured = "grafana-prom-dashboard.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "Going open-source in monitoring, part I: Deploying Prometheus and Grafana to Kubernetes"
 aliases = [
     "/post/going-open-source-in-monitoring-part-I-deploying-prometheus-and-grafana-to-kubernetes/"

@@ -7,6 +7,7 @@ featured = "buildtime.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "How to speed up builds and save time and money"
 
 +++

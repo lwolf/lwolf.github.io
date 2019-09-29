@@ -7,6 +7,7 @@ featured = "ci-pipeline.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "How to create CI/CD pipeline with autodeploy to Kubernetes using GitLab and Helm"
 
 +++

@@ -7,6 +7,7 @@ featured = "stolon-kube.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "How to deploy HA PostgreSQL cluster on Kubernetes"
 
 +++

@@ -9,6 +9,7 @@ featuredpath = "date"
 linktitle = ""
 images = ["img/2019/04/virtualservices-destrules.png"]
 draft = false
+type = "post"
 title = "Switching to Istio as the primary ingress"
 
 +++

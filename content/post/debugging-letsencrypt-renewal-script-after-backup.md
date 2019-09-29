@@ -7,6 +7,7 @@ featured = "letsencrypt.jpg"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "Debugging lets encrypt renewal script after backup"
 
 +++

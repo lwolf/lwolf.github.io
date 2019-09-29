@@ -7,6 +7,7 @@ featured = "etcd-min-cover-min.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "Going open-source in monitoring, part III: 10 most useful Grafana dashboards to monitor Kubernetes and services"
 +++
 

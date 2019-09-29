@@ -7,6 +7,7 @@ featured = "do-dns.png"
 featuredalt = ""
 featuredpath = "date"
 linktitle = ""
+type = "post"
 title = "How to get free DynDNS with DigitalOcean API and Kubernetes ScheduledJobs"
 
 +++
