@@ -6,7 +6,7 @@ addons:
 script:
   - rm -rf public || exit 0
   - wget -c https://github.com/gohugoio/hugo/releases/download/v0.58.3/hugo_extended_0.58.3_Linux-64bit.tar.gz -O - | tar -xz
-  - hugo --theme=hugo-future-imperfect-slim
+  - ./hugo --theme=hugo-future-imperfect-slim
   - cp robots.txt public/robots.txt
 
 deploy:
