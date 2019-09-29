@@ -67,7 +67,7 @@ relativeURLs = true
     [params.intro.pic]
       src                 = "/img/author.jpg"
       # Masks image in a certain shape. Supported are circle, triangle, diamond, and hexagon.
-      shape               = "circle"
+      shape               = "hexagon"
       width               = ""
       alt                 = "Hugo Future Imperfect Slim"
 
