@@ -19,9 +19,9 @@ relativeURLs = true
   cssFiles              = ["default"]
   jsFiles               = ["default"]
   # Sets options for highlight.js
-  highlightjs           = true
+  highlightjs           = false
   highlightjsTheme      = "github"
-  highlightjsLang       = ["html", "css", "js", "toml"]
+  highlightjsLang       = ["css", "yaml"]
   # Sets where "View More Posts" links to
   viewMorePostsLink     = "/post/"
   # Activate Estimated Reading Times, which appear in the post headers
