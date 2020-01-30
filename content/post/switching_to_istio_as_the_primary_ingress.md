@@ -13,8 +13,6 @@ title = "Switching to Istio as the primary ingress"
 
 +++
 
-# Switching to Istio as the primary ingress
-
 I’ve been following the news about [istio](https://istio.io/) since it’s first alpha release in 2017.  I think this project has a great future, because it solves a lot of pain points in the microservice based architecture, like auth, observability, fault-injection, etc.
 
 But the fact is, I never actually tried it. Prior to v1.0 there were too many bugs and limitations to put it into production. So, when they finally released “production-ready” version I got quite exciting. It still took me a few months to find free time, but I finally gave it a try.
