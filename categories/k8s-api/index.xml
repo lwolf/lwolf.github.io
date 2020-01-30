@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>k8s-api on lwolfs blog</title>
+    <link>https://blog.lwolf.org/categories/k8s-api/</link>
+    <description>Recent content in k8s-api on lwolfs blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 03 Sep 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://blog.lwolf.org/categories/k8s-api/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Making long running sitemap generation kubernetes-friendly using k8s-api and Minio</title>
+      <link>https://blog.lwolf.org/post/making-long-running-sitemap-generation-kubernetes-friendly-using-k8s-api-and-minio/</link>
+      <pubDate>Sun, 03 Sep 2017 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.lwolf.org/post/making-long-running-sitemap-generation-kubernetes-friendly-using-k8s-api-and-minio/</guid>
+      <description>Generation of sitemaps is usually not a problem, at least not until you have several millions of items in the database to iterate through. Currently, I have slightly more than 4M documents, so it takes time to regenerate. Previously all my sitemaps were stored on the disk and were served using simple Nginx container. It worked like this:
+ Sitemap-related containers have nodeSelector to assign to particular node with hostPath volume sitemaps are served from /data/sitemaps folder periodic task generates new sitemaps to /data/sitemaps-temp on completion, folders is atomically switched  It was fine in my previous VM-based cluster, which was on a single physical machine.</description>
+    </item>
+    
+  </channel>
+</rss>

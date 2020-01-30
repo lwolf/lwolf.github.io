@@ -1,0 +1,1314 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        
+            
+                <title>Going open-source in monitoring, part V: Collecting errors from production using Sentry</title>
+            
+        
+
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content="Hugo 0.54.0" />
+        
+    <link rel="icon" href='../../favicon/favicon.png'>
+    
+    <meta name="msapplication-TileColor" content="#da532c">
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+
+
+        
+            <meta name="author" content="Sergey Nuzhdin">
+        
+        
+            <meta name="description" content="Series of posts about migration from commercial monitoring systems to opensource. Replace NewRelic with Prometheus">
+        
+
+        <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Going open-source in monitoring, part V: Collecting errors from production using Sentry"/>
+<meta name="twitter:description" content="Series of posts about migration from commercial monitoring systems to opensource. Replace NewRelic with Prometheus"/>
+<meta name="twitter:site" content="@SergeyNuzhdin"/>
+
+        <meta property="og:title" content="Going open-source in monitoring, part V: Collecting errors from production using Sentry" />
+<meta property="og:description" content="Series of posts about migration from commercial monitoring systems to opensource. Replace NewRelic with Prometheus" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.lwolf.org/post/going-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry/" />
+<meta property="article:published_time" content="2017-09-06T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2017-09-06T00:00:00&#43;00:00"/>
+
+        
+<meta itemprop="name" content="Going open-source in monitoring, part V: Collecting errors from production using Sentry">
+<meta itemprop="description" content="Series of posts about migration from commercial monitoring systems to opensource. Replace NewRelic with Prometheus">
+
+
+<meta itemprop="datePublished" content="2017-09-06T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2017-09-06T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1030">
+
+
+
+<meta itemprop="keywords" content="" />
+
+        
+
+        
+
+        
+        
+            
+        
+
+        
+        
+            <link rel="stylesheet" href="../../css/google-font.css" />
+            <link rel="stylesheet" href="../../css/font-awesome.min.css" />
+            <link rel="stylesheet" href="../../css/main.css" />
+            <link rel="stylesheet" href="../../css/add-on.css" />
+            <link rel="stylesheet" href="../../css/monokai-sublime.css">
+        
+
+        
+
+        
+        
+        
+            
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-47060494-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+        
+    </head>
+    <body>
+
+        
+        <div id="wrapper">
+
+    
+    
+<header id="header">
+    
+        <h2><a href="../../">lwolfs blog</i></a></h2>
+    
+
+    <nav class="links">
+        <ul>
+            
+                <li>
+                    <a href="../../post">
+                        
+                            <i class="fa fa-newspaper-o">&nbsp;</i>Posts
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="../../categories">
+                        Categories
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="../../about">
+                        About
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="http://eepurl.com/cdUha1">
+                        Subscribe
+                    </a>
+                </li>
+            
+        </ul>
+    </nav>
+    <nav class="main">
+        <ul>
+            
+            <li id="share-nav" class="share-menu" style="display:none;">
+                <a class="fa-share-alt" href="#share-menu">Share</a>
+            </li>
+            
+            <li class="search">
+                <a class="fa-search" href="#search">Search</a>
+                <form id="search" method="get" action="//google.com/search">
+                    <input type="text" name="q" placeholder="Search" />
+                    <input type="hidden" name="q" value="site:https://blog.lwolf.org">
+                </form>
+            </li>
+            <li class="menu">
+                <a class="fa-bars" href="#menu">Menu</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+
+<section id="menu">
+
+    
+        <section>
+            <form class="search" method="get" action="//google.com/search">
+                <input type="text" name="q" placeholder="Search" />
+                <input type="hidden" name="q" value="site:https://blog.lwolf.org">
+            </form>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                
+                    <li>
+                        <a href="../../post">
+                            <h3>
+                                
+                                    <i class="fa fa-newspaper-o">&nbsp;</i>
+                                
+                                Posts
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="../../categories">
+                            <h3>
+                                
+                                Categories
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="../../about">
+                            <h3>
+                                
+                                About
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="http://eepurl.com/cdUha1">
+                            <h3>
+                                
+                                Subscribe
+                            </h3>
+                        </a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/"><p>Agola - One CI To Run Them All</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/"><p>Switching to Istio as the primary ingress</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/"><p>How to deploy multi-arch Kubernetes cluster using Kubespray</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/home-lab-infrastructure-overview/"><p>Home Lab Infrastructure Overview</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/going-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry/"><p>Going open-source in monitoring, part V: Collecting errors from production using Sentry</p></a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        
+</section>
+
+    <section id="share-menu">
+    <section id="social-share-nav">
+        <ul class="links">
+            <header>
+                <h3>Share this post <i class="fa fa-smile-o"></i></h3>
+            </header>
+            
+
+
+<li><a href="//twitter.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f&text=Going%20open-source%20in%20monitoring%2c%20part%20V%3a%20Collecting%20errors%20from%20production%20using%20Sentry&via=SergeyNuzhdin" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f&title=Going%20open-source%20in%20monitoring%2c%20part%20V%3a%20Collecting%20errors%20from%20production%20using%20Sentry" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f&title=Going%20open-source%20in%20monitoring%2c%20part%20V%3a%20Collecting%20errors%20from%20production%20using%20Sentry" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f&title=Going%20open-source%20in%20monitoring%2c%20part%20V%3a%20Collecting%20errors%20from%20production%20using%20Sentry" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Sergey%20Nuzhdin&body=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+</section>
+
+    
+    <div id="main">
+        
+        
+        <article class="post">
+    <header>
+    <div class="title">
+        
+            <h1><a href="https://blog.lwolf.org/post/going-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry/">Going open-source in monitoring, part V: Collecting errors from production using Sentry</a></h1>
+            
+        
+        
+            <p>Series of posts about migration from commercial monitoring systems to opensource. Replace NewRelic with Prometheus</p>
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2017-09-06'>
+            September 6, 2017</time>
+        <span class="author">Sergey Nuzhdin</span>
+        
+            <p>5 minute read</p>
+        
+        
+    </div>
+</header>
+
+
+    <section id="social-share">
+        <ul class="icons">
+            
+
+
+<li><a href="//twitter.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f&text=Going%20open-source%20in%20monitoring%2c%20part%20V%3a%20Collecting%20errors%20from%20production%20using%20Sentry&via=SergeyNuzhdin" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f&title=Going%20open-source%20in%20monitoring%2c%20part%20V%3a%20Collecting%20errors%20from%20production%20using%20Sentry" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f&title=Going%20open-source%20in%20monitoring%2c%20part%20V%3a%20Collecting%20errors%20from%20production%20using%20Sentry" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f&title=Going%20open-source%20in%20monitoring%2c%20part%20V%3a%20Collecting%20errors%20from%20production%20using%20Sentry" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Sergey%20Nuzhdin&body=https%3a%2f%2fblog.lwolf.org%2fpost%2fgoing-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+    
+    
+
+    
+        
+        
+
+
+
+
+    
+    
+        
+    
+
+
+        
+
+        <a href="https://blog.lwolf.org/post/going-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry/" class="image featured">
+            <img src="../../img/2017/09/sentry-overview.png" alt="" />
+        </a>
+    
+
+
+    <div id="content">
+        
+
+<p>In this part of the series, I’m going to add Sentry to the monitoring stack.
+For those who do not know, <a href="https://sentry.io/"><strong>Sentry</strong></a> is an open-source cross-platform crash reporting and aggregation platform written in Python.
+I know about it for several years now, since the time it supported only a few languages. A lot has changed since my last use of it: new domain, new languages, new integrations. Today it has integrations with most of the modern languages and frameworks like Elixir, React, React-Native, Go. Not to mention olds like Java, PHP or Python. The full list of languages is available on <a href="https://github.com/getsentry/sentry#official-sentry-sdks">Github</a> and <a href="https://sentry.io/platforms/">official site</a>.</p>
+
+<p>This post is one of a series of posts about monitoring of infrastructure and services. Other posts in the series:</p>
+
+<ol>
+<li><strong><a href="../../post/going-open-source-in-monitoring-part-0-intro/">Intro</a></strong></li>
+<li><strong><a href="../../post/going-open-source-in-monitoring-part-i-deploying-prometheus-and-grafana-to-kubernetes/">Deploying Prometheus and Grafana to Kubernetes</a></strong></li>
+<li><strong><a href="../../post/going-open-source-in-monitoring-part-ii-creating-the-first-dashboard-in-grafana/">Creating the first dashboard in Grafana</a></strong></li>
+<li><strong><a href="http://blog.lwolf.org/post/going-open-source-in-monitoring-part-iii-10-most-useful-grafana-dashboards-to-monitor-kubernetes-and-services/">10 most useful Grafana dashboards to monitor Kubernetes and services</a></strong></li>
+<li>Configuring alerts in Prometheus and Grafana</li>
+<li><strong>Collecting errors from production using Sentry</strong> (this article)</li>
+<li>Making sense of logs with ELK stack</li>
+<li>Replacing commercial APM monitoring</li>
+<li>SLA, SLO, SLI and other useful abstractions</li>
+</ol>
+
+<hr />
+
+<h1 id="installation-on-k8s">Installation on k8s</h1>
+
+<p>Sentry has several moving parts: server, workers, sql database and Redis.
+You can find a <a href="https://github.com/kubernetes/charts/tree/master/stable/sentry">good chart</a> in the kubernetes-charts repository which will work for most scenarios.
+ The only missing features for me in this chart were the impossibility of using s3-like storage for persistence out of the box and the ability to use already existing databases. It was not hard to add it, but now I have to maintain my copy of the chart.
+Aside from this, configuration and installation are straightforward.</p>
+
+<h1 id="sentry-integrations">Sentry integrations</h1>
+
+<p>As I already mentioned sentry can collect errors from most of modern languages and frameworks. It also integrates with a bunch of applications and services. Some of it is shown in the screenshot.</p>
+
+<figure>
+    <img src="../../img/2017/09/sentry-frameworks-and-integrations.png"
+         alt="Sentry supported languages and integrations"/> 
+</figure>
+
+
+<p>In my current <a href="https://librer.io">project</a> I have:</p>
+
+<ul>
+<li><strong>Python/Flask</strong> - most of the backend APIs so far</li>
+<li><strong>Python/Scrapy -</strong> the best scraping framework out there</li>
+<li><strong>Golang</strong> for some services</li>
+<li><strong>Universal/Isomorphic React</strong>  as frontend</li>
+</ul>
+
+<p>I’m going to add sentry monitoring to all these systems, also I’m going to add integrations with Gitlab and Slack.</p>
+
+<h2 id="collect-reports-from-python-flask">Collect reports from Python/Flask ✔</h2>
+
+<p>Integration with Flask is usually the easiest example of integration.  You just add</p>
+
+<pre><code>from raven.contrib.flask import Sentry
+sentry = Sentry(app, dsn='your dsn')
+</code></pre>
+
+<p>and you will start receiving all of your tracebacks. But this time I had to spend some extra time trying to debug SSL issues. It took way more time to debug since I was facing another SSL issue with a python-kubernetes client the same time.
+It turned out to be two separate problems with the same error :)</p>
+
+<pre><code>In [1]: from raven import Client
+In [2]: client = Client('https://key:secret@sentry.example.com/2')
+In [3]: client.captureMessage('hello, world!')
+Out[3]: '4ba5df0f8621406bbbce47a18b987c60'
+In [4]: Sentry responded with an error: &lt;urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:645)&gt; (url: https://sentry.example.com/api/2/store/)
+Traceback (most recent call last):
+...
+ssl.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:645)
+...
+urllib.error.URLError: &lt;urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed (_ssl.c:645)&gt;
+</code></pre>
+
+<p>In the case with sentry, the <a href="https://community.letsencrypt.org/t/problems-with-sentry-and-letsencrypt/19948/3">problem was</a> because raven (Python client for sentry) does not support <a href="https://en.wikipedia.org/wiki/Server_Name_Indication">SNI</a>.</p>
+
+<blockquote>
+<p><strong>Server Name Indication (SNI)</strong> is an extension to the TLS computer networking protocol by which a client indicates which hostname it is attempting to connect to at the start of the handshaking process. This allows a server to present multiple certificates on the same IP address and TCP port number and hence allows multiple secure (HTTPS) websites (or any other Service over TLS) to be served by the same IP address without requiring all those sites to use the same certificate. It is the conceptual equivalent to HTTP/1.1 name-based virtual hosting, but for HTTPS.</p>
+</blockquote>
+
+<p>Luckily it supports <a href="https://raven.readthedocs.io/en/stable/transports.html">overriding of the transport protocol</a>,</p>
+
+<pre><code>from raven.transport.requests import RequestsHTTPTransport
+SENTRY_CONFIG = {
+    'dsn': os.environ.get('SENTRY_DSN'),
+    'transport': RequestsHTTPTransport,
+}
+</code></pre>
+
+<p>After I found this fix, everything started to work.</p>
+
+<h2 id="collect-reports-from-python-scrapy">Collect reports from Python/Scrapy  ✔</h2>
+
+<p>Adding Sentry to Scrapy is similar. Just add a few settings to the config after installing the <a href="https://github.com/llonchj/scrapy-sentry">extension</a></p>
+
+<pre><code># sentry dsn
+SENTRY_DSN = 'http://public:secret@example.com/1'
+EXTENSIONS = {
+    &quot;scrapy_sentry.extensions.Errors&quot;:10,
+}
+</code></pre>
+
+<h2 id="collect-reports-from-isomorphic-universal-react-app">Collect reports from isomorphic/universal react app ✔</h2>
+
+<p>Integration with client-side JS or with backend-side is easy. Making it work in Universal App is a bit trickier. As a solution for <a href="https://github.com/kriasoft/react-starter-kit">ReactStarterKit based</a> project, I end up with something like this.</p>
+
+<figure>
+    <img src="../../img/2017/09/frontend-sentry-package.png"
+         alt="Frontend sentry package"/> 
+</figure>
+
+
+<p>Have a package named raven which imports either <code>raven.client.js</code> or <code>raven.server.js</code> based on environment.
+And then use it the same way in both <code>server.js</code> and <code>client.js</code></p>
+
+<pre><code># client/server
+import Raven from './services/shared/raven';
+import { sentry } from './config';
+
+if (sentry.dsn) {
+  Raven.config(sentry.dsn).install();
+}
+</code></pre>
+
+<h2 id="collect-reports-from-golang">Collect reports from Golang ✔</h2>
+
+<pre><code>package main
+
+import &quot;github.com/getsentry/raven-go&quot;
+
+func init() {
+    raven.SetDSN(&quot;https://&lt;key&gt;:&lt;secret&gt;@sentry.io/&lt;project&gt;&quot;)
+}
+</code></pre>
+
+<h1 id="integrations">Integrations</h1>
+
+<p>Sentry supports more than 25 integrations with other platforms, for now, I’m going to enable only two: gitlab and slack.
+In Sentry, you can enable a different set of apps for each project. To do it you need to go the project settings <strong>Open Project → Project Setting</strong> and select <strong>All Integrations</strong> in the side menu. You will get a list of all available integration to select.  After saving you will have your integrations listed in the side menu.</p>
+
+<figure>
+    <img src="../../img/2017/09/sentry-integrations-list.png"
+         alt="Sentry integrations menu"/> 
+</figure>
+
+
+<h2 id="gitlab">Gitlab</h2>
+
+<p>After enabling Gitlab you need to configure it. You will need to <a href="https://docs.gitlab.com/ce/user/profile/personal_access_tokens.html">create an <strong>Access Token</strong></a> in Gitlab and enter it in the Configuration page of Sentry.</p>
+
+<figure>
+    <img src="../../img/2017/09/gitlab-integration.png"
+         alt="Gitlab Configuration in Sentry"/> 
+</figure>
+
+
+<p>At the end, you will have a nice Gitlab button on the toolbar. It gives you ability to associate Sentry stacktrace with a new or Existing Gitlab issue in a few clicks.</p>
+
+<figure>
+    <img src="../../img/2017/09/sentry-gitlab-button.png"
+         alt="Associate Sentry error with Gitlab issue"/> 
+</figure>
+
+
+<h2 id="slack">Slack</h2>
+
+<p>Connecting slack is easy as everywhere.
+First, you need to create new webhook configuration in team settings on Slack: <a href="https://your-team.slack.com/apps/manage/custom-integrations">https://your-team.slack.com/apps/manage/custom-integrations</a>.</p>
+
+<figure>
+    <img src="../../img/2017/09/slack-add-webhook.png"
+         alt="Creating webhook configuration in Slack"/> 
+</figure>
+
+
+<p>You’ll get a webhook URL that you’ll need to enter in Sentry on the Slack settings page. It has few other common settings like selecting a channel to post to, customising tags or bot name.</p>
+
+<figure>
+    <img src="../../img/2017/09/slack-event.png"
+         alt="Slack event"/> 
+</figure>
+
+
+<h1 id="wrap-up">Wrap up</h1>
+
+<p>Sentry became a very mature product with a lot of supported frameworks and integrations. It is really easy to configure, at least in languages I’ve tried, and use. Excluding the SNI issue, it took me just a few hours to install it in Kubernetes and add it to all my projects.
+I believe it is the best opensource solution in the field available today.</p>
+
+<p>Stay tuned.</p>
+
+    </div>
+
+    <div>
+        <hr/>
+        <b>Like this post?</b> Want more? <a href="http://eepurl.com/cdUha1"><b><u>Subscribe</u></b></a> to get updates delivered straight to your inbox.
+        <hr/>
+    </div>
+    <footer>
+        <ul class="stats">
+    
+        
+
+        
+        
+            <li>
+                
+                
+                    
+
+                    
+                    
+
+                    
+
+                    
+                        Categories
+                    
+                
+            </li>
+        
+    
+
+    
+    
+        <li><a href='../../categories/docker'>docker</a></li>
+    
+        <li><a href='../../categories/infrastructure'>infrastructure</a></li>
+    
+        <li><a href='../../categories/kubernetes'>kubernetes</a></li>
+    
+        <li><a href='../../categories/monitoring'>monitoring</a></li>
+    
+        <li><a href='../../categories/sentry'>sentry</a></li>
+    
+        <li><a href='../../categories/gitlab'>gitlab</a></li>
+    
+</ul>
+
+    </footer>
+</article>
+<ul class="actions pagination">
+    
+        <li><a href="https://blog.lwolf.org/post/making-long-running-sitemap-generation-kubernetes-friendly-using-k8s-api-and-minio/"
+                class="button big previous">Making long running sitemap generation kubernetes-friendly using k8s-api and Minio</a></li>
+    
+
+    
+        <li><a href="https://blog.lwolf.org/post/home-lab-infrastructure-overview/"
+                class="button big next">Home Lab Infrastructure Overview</a></li>
+    
+</ul>
+
+
+
+    
+        <article class="post">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "blog-lwolf" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </article>
+    
+
+
+    </div>
+    
+<section id="sidebar">
+
+    
+        <section id="intro">
+            
+            
+                
+                    <a href="../../" class="logo"><img src="../../img/author.jpg" alt="Hugo Future Imperfect" /></a>
+                
+            
+            
+                <header>
+                    <h2>LWOLFS BLOG</h2>
+                    <p>Blog about dev and ops stuff, mostly cloud-native, containers, kubernetes, CI/CD, etc</p>
+                </header>
+            
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/lwolf" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/sergey-nuzhdin-9925b31a" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//facebook.com/snuzhdin" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+<li><a href="//twitter.com/SergeyNuzhdin" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+<li><a href="mailto:ipaq.lw@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+        </section>
+
+    
+        <section id="recent-posts">
+            <ul class="posts">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/">Agola - One CI To Run Them All</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2020-01-30'>
+                                    January 30, 2020</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/">Switching to Istio as the primary ingress</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-04-08'>
+                                    April 8, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/">How to deploy multi-arch Kubernetes cluster using Kubespray</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-02-02'>
+                                    February 2, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/home-lab-infrastructure-overview/">Home Lab Infrastructure Overview</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-01-23'>
+                                    January 23, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/going-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry/">Going open-source in monitoring, part V: Collecting errors from production using Sentry</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-09-06'>
+                                    September 6, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+
+                
+                    <li>
+                        <ul class="actions">
+                            <li><a href=
+                            
+                                /post/
+                            
+                            class="button">View more posts</a></li>
+                        </ul>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+    
+    
+    
+        <section id="categories">
+            <ul class="posts">
+                <header>
+                    <h3><a href="../../categories/">Categories</a></h3>
+                </header>
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/docker/">docker</a>
+                                <span style="float:right;">24</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/kubernetes/">kubernetes</a>
+                                <span style="float:right;">24</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/infrastructure/">infrastructure</a>
+                                <span style="float:right;">23</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/k8s/">k8s</a>
+                                <span style="float:right;">16</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/devops/">devops</a>
+                                <span style="float:right;">12</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ci/cd/">ci/cd</a>
+                                <span style="float:right;">8</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/gitlab/">gitlab</a>
+                                <span style="float:right;">8</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/monitoring/">monitoring</a>
+                                <span style="float:right;">5</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/prometheus/">prometheus</a>
+                                <span style="float:right;">4</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/coding/">coding</a>
+                                <span style="float:right;">3</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/architecture/">architecture</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/coreos/">coreos</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/glusterfs/">glusterfs</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/python/">python</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/storage/">storage</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/faas/">FaaS</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/python/">Python</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/code/">code</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/golang/">golang</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/high-availability/">high-availability</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ingress/">ingress</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/istio/">istio</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/k8s-api/">k8s-api</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/letsencrypt/">letsencrypt</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/minio/">minio</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/nginx/">nginx</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/postgresql/">postgresql</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/sentry/">sentry</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/serverless/">serverless</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/service-mesh/">service-mesh</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/sql/">sql</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ssl/">ssl</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+            </ul>
+        </section>
+    
+
+    
+        
+        <section class="blurb">
+            <h2>About</h2>
+            <p>Some about me text...</p>
+
+            <ul class="actions">
+                <li><a href="../../about/" class="button">Learn More</a></li>
+            </ul>
+        </section>
+        
+
+    
+        <section id="footer">
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/lwolf" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/sergey-nuzhdin-9925b31a" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//facebook.com/snuzhdin" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+<li><a href="//twitter.com/SergeyNuzhdin" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+<li><a href="mailto:ipaq.lw@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+
+            <p class="copyright">&copy; lwolfs blog. Design: <a href="http://html5up.net" target="_blank">HTML5 UP</a>. Ported by <a href="//github.com/jpescador" target="_blank">Julio Pescador</a>. Powered by <a href="//gohugo.io" target="_blank">Hugo</a></p>
+        </section>
+
+</section>
+
+            </div>
+        <a id="back-to-top" href="#" class="fa fa-arrow-up fa-border fa-2x"></a>
+        
+
+        
+        
+            
+        
+
+        
+        
+            <script src="../../js/jquery.min.js"></script>
+            <script src="../../js/skel.min.js"></script>
+            <script src="../../js/util.js"></script>
+            <script src="../../js/main.js"></script>
+            <script src="../../js/backToTop.js"></script>
+            <script src="../../js/highlight.pack.js"></script>
+        
+
+        
+
+            
+            <script>hljs.initHighlightingOnLoad();</script>
+            
+
+            
+            <script type="text/javascript" src="https://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-538070ba29aaa8d5"></script>
+
+    </body>
+</html>
+

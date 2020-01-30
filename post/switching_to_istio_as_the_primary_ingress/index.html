@@ -1,0 +1,1410 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        
+            
+                <title>Switching to Istio as the primary ingress</title>
+            
+        
+
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content="Hugo 0.54.0" />
+        
+    <link rel="icon" href='../../favicon/favicon.png'>
+    
+    <meta name="msapplication-TileColor" content="#da532c">
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+
+
+        
+            <meta name="author" content="Sergey Nuzhdin">
+        
+        
+            <meta name="description" content="Switching to Istio as the primary ingress">
+        
+
+        <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.lwolf.org/img/2019/04/virtualservices-destrules.png"/>
+
+<meta name="twitter:title" content="Switching to Istio as the primary ingress"/>
+<meta name="twitter:description" content="Switching to Istio as the primary ingress"/>
+<meta name="twitter:site" content="@SergeyNuzhdin"/>
+
+        <meta property="og:title" content="Switching to Istio as the primary ingress" />
+<meta property="og:description" content="Switching to Istio as the primary ingress" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/" />
+
+<meta property="og:image" content="https://blog.lwolf.org/img/2019/04/virtualservices-destrules.png" />
+<meta property="article:published_time" content="2019-04-08T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-04-08T00:00:00&#43;00:00"/>
+
+        
+<meta itemprop="name" content="Switching to Istio as the primary ingress">
+<meta itemprop="description" content="Switching to Istio as the primary ingress">
+
+
+<meta itemprop="datePublished" content="2019-04-08T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2019-04-08T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1608">
+
+  <meta itemprop="image" content="https://blog.lwolf.org/img/2019/04/virtualservices-destrules.png">
+
+
+
+<meta itemprop="keywords" content="" />
+
+        
+
+        
+
+        
+        
+            
+        
+
+        
+        
+            <link rel="stylesheet" href="../../css/google-font.css" />
+            <link rel="stylesheet" href="../../css/font-awesome.min.css" />
+            <link rel="stylesheet" href="../../css/main.css" />
+            <link rel="stylesheet" href="../../css/add-on.css" />
+            <link rel="stylesheet" href="../../css/monokai-sublime.css">
+        
+
+        
+
+        
+        
+        
+            
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-47060494-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+        
+    </head>
+    <body>
+
+        
+        <div id="wrapper">
+
+    
+    
+<header id="header">
+    
+        <h2><a href="../../">lwolfs blog</i></a></h2>
+    
+
+    <nav class="links">
+        <ul>
+            
+                <li>
+                    <a href="../../post">
+                        
+                            <i class="fa fa-newspaper-o">&nbsp;</i>Posts
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="../../categories">
+                        Categories
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="../../about">
+                        About
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="http://eepurl.com/cdUha1">
+                        Subscribe
+                    </a>
+                </li>
+            
+        </ul>
+    </nav>
+    <nav class="main">
+        <ul>
+            
+            <li id="share-nav" class="share-menu" style="display:none;">
+                <a class="fa-share-alt" href="#share-menu">Share</a>
+            </li>
+            
+            <li class="search">
+                <a class="fa-search" href="#search">Search</a>
+                <form id="search" method="get" action="//google.com/search">
+                    <input type="text" name="q" placeholder="Search" />
+                    <input type="hidden" name="q" value="site:https://blog.lwolf.org">
+                </form>
+            </li>
+            <li class="menu">
+                <a class="fa-bars" href="#menu">Menu</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+
+<section id="menu">
+
+    
+        <section>
+            <form class="search" method="get" action="//google.com/search">
+                <input type="text" name="q" placeholder="Search" />
+                <input type="hidden" name="q" value="site:https://blog.lwolf.org">
+            </form>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                
+                    <li>
+                        <a href="../../post">
+                            <h3>
+                                
+                                    <i class="fa fa-newspaper-o">&nbsp;</i>
+                                
+                                Posts
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="../../categories">
+                            <h3>
+                                
+                                Categories
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="../../about">
+                            <h3>
+                                
+                                About
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="http://eepurl.com/cdUha1">
+                            <h3>
+                                
+                                Subscribe
+                            </h3>
+                        </a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/"><p>Agola - One CI To Run Them All</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/"><p>Switching to Istio as the primary ingress</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/"><p>How to deploy multi-arch Kubernetes cluster using Kubespray</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/home-lab-infrastructure-overview/"><p>Home Lab Infrastructure Overview</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/going-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry/"><p>Going open-source in monitoring, part V: Collecting errors from production using Sentry</p></a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        
+</section>
+
+    <section id="share-menu">
+    <section id="social-share-nav">
+        <ul class="links">
+            <header>
+                <h3>Share this post <i class="fa fa-smile-o"></i></h3>
+            </header>
+            
+
+
+<li><a href="//twitter.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f&text=Switching%20to%20Istio%20as%20the%20primary%20ingress&via=SergeyNuzhdin" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f&title=Switching%20to%20Istio%20as%20the%20primary%20ingress" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f&title=Switching%20to%20Istio%20as%20the%20primary%20ingress" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f&title=Switching%20to%20Istio%20as%20the%20primary%20ingress" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Sergey%20Nuzhdin&body=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+</section>
+
+    
+    <div id="main">
+        
+        
+        <article class="post">
+    <header>
+    <div class="title">
+        
+            <h1><a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/">Switching to Istio as the primary ingress</a></h1>
+            
+        
+        
+            <p>Switching to Istio as the primary ingress</p>
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2019-04-08'>
+            April 8, 2019</time>
+        <span class="author">Sergey Nuzhdin</span>
+        
+            <p>8 minute read</p>
+        
+        
+    </div>
+</header>
+
+
+    <section id="social-share">
+        <ul class="icons">
+            
+
+
+<li><a href="//twitter.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f&text=Switching%20to%20Istio%20as%20the%20primary%20ingress&via=SergeyNuzhdin" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f&title=Switching%20to%20Istio%20as%20the%20primary%20ingress" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f&title=Switching%20to%20Istio%20as%20the%20primary%20ingress" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f&title=Switching%20to%20Istio%20as%20the%20primary%20ingress" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Sergey%20Nuzhdin&body=https%3a%2f%2fblog.lwolf.org%2fpost%2fswitching_to_istio_as_the_primary_ingress%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+    
+    
+
+    
+        
+        
+
+
+
+
+    
+    
+        
+    
+
+
+        
+
+        <a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/" class="image featured">
+            <img src="../../img/2019/04/virtualservices-destrules.png" alt="image source: https://istio.io/blog/2018/v1alpha3-routing/" />
+        </a>
+    
+
+
+    <div id="content">
+        
+
+<p>I’ve been following the news about <a href="https://istio.io/">istio</a> since it’s first alpha release in 2017.  I think this project has a great future, because it solves a lot of pain points in the microservice based architecture, like auth, observability, fault-injection, etc.</p>
+
+<p>But the fact is, I never actually tried it. Prior to v1.0 there were too many bugs and limitations to put it into production. So, when they finally released “production-ready” version I got quite exciting. It still took me a few months to find free time, but I finally gave it a try.</p>
+
+<p>​​I decided to start my experimentations with Istio not from the usual bookstore example, but by making it the main ingress controller, responsible for all the traffic, incoming to my cluster. Previously, I used ingress-nginx, more precisely I had 2 ingress-controllers: one exposed to the Internet and one for internal-only services.  This post is about replacing both of them with Istio.</p>
+
+<h2 id="install">Install</h2>
+
+<blockquote>
+<p>This post is referencing Istio version <a href="https://github.com/istio/istio/releases/tag/1.1.0-rc.0">1.1.0-rc.0</a>, unless explicitly stated otherwise</p>
+</blockquote>
+
+<p>It is extremely easy and straight forward to install istio using helm chart, at least if you’re not trying to understand what all of the configuration options mean. I started by copying the default <code>values.yaml</code> file and enabling all the components (ingress, grafana, servicegraph, tracing, kiali, istiocoredns, istio_cni).</p>
+
+<pre><code># add istio helm repo
+$ helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.1.0-rc.0/charts
+
+# sync your index
+$ helm repo update
+
+# I usually save default values.yaml file to the values-custom.yaml to add to the repo
+$ helm upgrade --install -f istio/values-custom.yaml istio istio.io/istio --namespace istio-system
+</code></pre>
+
+<p>Assuming there were no problems during the installation, you now have a new namespace filled with containers.</p>
+
+<pre><code>$ kubectl get pods -n istio-system
+grafana-d5d58cb7-fchjq                    1/1       Running     0          20h
+istio-citadel-c4489d577-wlwdh             1/1       Running     0          20h
+istio-egressgateway-5d4dd5f974-84btz      1/1       Running     0          20h
+istio-galley-57586fbc4-wgp55              1/1       Running     0          20h
+istio-ingress-6bf7fd96bd-v4s28            1/1       Running     0          20h
+istio-ingressgateway-6469b49cf-75pnb      1/1       Running     0          20h
+istio-pilot-5d76999bfc-lthr5              2/2       Running     0          20h
+istio-policy-5684c685cb-5qphq             2/2       Running     4          20h
+istio-sidecar-injector-58dff7458d-cqbhd   1/1       Running     0          20h
+istio-telemetry-7594984994-zgnlw          2/2       Running     4          20h
+istio-tracing-758ccfbfd9-9xdrc            1/1       Running     0          20h
+istiocoredns-c49bd87fb-75w8b              2/2       Running     0          20h
+kiali-986b769f4-cgxv4                     1/1       Running     0          20h
+prometheus-5c69f8d648-tm78k               1/1       Running     0          20h
+servicegraph-c69f96d97-r2qmh              1/1       Running     1          20h
+</code></pre>
+
+<p>and of course a lot of new services</p>
+
+<pre><code>NAME                     TYPE           CLUSTER-IP      EXTERNAL-IP     PORT(S)                                                      AGE
+grafana                  ClusterIP      10.233.47.239   &lt;none&gt;          3000/TCP                                                      1h
+istio-citadel            ClusterIP      10.233.52.66    &lt;none&gt;          8060/TCP,15014/TCP                                           1h
+istio-egressgateway      ClusterIP      10.233.39.186   &lt;none&gt;          80/TCP,443/TCP,15443/TCP                                     1h
+istio-galley             ClusterIP      10.233.6.227    &lt;none&gt;          443/TCP,15014/TCP,9901/TCP                                   1h
+istio-ingress            LoadBalancer   10.233.29.116   192.168.11.122   80:32000/TCP,443:32256/TCP                                   1h
+istio-ingressgateway     LoadBalancer   10.233.37.74    192.168.11.121   80:31380/TCP,443:31390/TCP                                   1h
+istio-pilot              ClusterIP      10.233.37.223   &lt;none&gt;          15010/TCP,15011/TCP,8080/TCP,15014/TCP                       1h
+istio-policy             ClusterIP      10.233.60.111   &lt;none&gt;          9091/TCP,15004/TCP,15014/TCP                                 1h
+istio-sidecar-injector   ClusterIP      10.233.47.222   &lt;none&gt;          443/TCP                                                      1h
+istio-telemetry          ClusterIP      10.233.3.12     &lt;none&gt;          9091/TCP,15004/TCP,15014/TCP,42422/TCP                       1h
+istiocoredns             ClusterIP      10.233.48.14    &lt;none&gt;          53/UDP,53/TCP                                                1h
+jaeger-agent             ClusterIP      None            &lt;none&gt;          5775/UDP,6831/UDP,6832/UDP                                   1h
+jaeger-collector         ClusterIP      10.233.2.234    &lt;none&gt;          14267/TCP,14268/TCP                                          1h
+jaeger-query             ClusterIP      10.233.46.47    &lt;none&gt;          16686/TCP                                                    1h
+kiali                    ClusterIP      10.233.31.94    &lt;none&gt;          20001/TCP                                                    1h
+prometheus               ClusterIP      10.233.51.54    &lt;none&gt;          9090/TCP                                                     1h
+servicegraph             ClusterIP      10.233.4.101    &lt;none&gt;          8088/TCP                                                     1h
+tracing                  ClusterIP      10.233.0.59     &lt;none&gt;          80/TCP                                                       1h
+zipkin                   ClusterIP      10.233.7.229    &lt;none&gt;          9411/TCP                                                     1h
+</code></pre>
+
+<blockquote>
+<p>Services with the type LoadBalancer got their External IPs from the <a href="https://github.com/google/metallb">metallb</a> load balancer set up in the cluster.</p>
+</blockquote>
+
+<p>some of the questions one may have at this point are:</p>
+
+<ul>
+<li>What’s the difference between <strong>istio-ingress</strong> and <strong>istio-ingressgateway</strong>, which one should you set in your DNS?</li>
+<li>How to access default istio services e.g kiali, grafana, prometheus?</li>
+<li>How to expose something to the outside world?</li>
+</ul>
+
+<h2 id="ingressing-traffic-istio-ingress-and-istio-ingressgateway">Ingressing traffic: istio-ingress and istio-ingressgateway</h2>
+
+<p>The Ingress controller is, basically, a reverse-proxy that runs in a cluster and configures routing rules according to Ingress resources.
+Istio provides two ways of ingressing traffic into your cluster.</p>
+
+<p>First one, <strong>istio-ingress</strong>, is a traditional ingress controller like <a href="https://github.com/kubernetes/ingress-nginx">nginx-ingress</a>, <a href="https://github.com/containous/traefik">traefik</a> or <a href="https://github.com/heptio/contour">controur</a>.
+This controller runs in your cluster and listens to all the changes to Ingress resources from the Kubernetes API and sends incoming traffic according to these rules.
+You can easily swap one ingress controller to another by just changing the annotation on your ingress objects:</p>
+
+<pre><code>apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+</code></pre>
+
+<p>Istio documentation discourages use of this method as a “legacy way” and suggests using the second one.</p>
+
+<p>The second one, <strong>istio-ingressgateway,</strong> is also an ingress controller, but unlike traditional ones, it does not rely on native Kubernetes Ingress objects. It uses its own custom resources: Gateway, VirtualService, DestinationRule, etc.
+Using custom resources provides more flexibility in configuring network policies, but also makes you write a few more YAMLs for each service.
+In this post, I’m going to use the second one.</p>
+
+<h2 id="exposing-services-using-istio-ingressgateway">Exposing services using Istio-ingressgateway</h2>
+
+<p>To expose a service using ingressgateway you have to create at least 2 objects - Gateway and a VirtualService.
+As an example, let’s expose the internal istio services.
+Assuming that we have domain <strong>example.com</strong> we need to create a following gateway:</p>
+
+<pre><code>apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: service-gw
+  namespace: default
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http-system
+        protocol: HTTP
+      hosts:
+      - &quot;grafana.example.com&quot;
+      - &quot;kiali.example.com&quot;
+      - &quot;prometheus.example.com&quot;
+      - &quot;jaeger.example.com&quot;
+</code></pre>
+
+<p>Here we create a rule for the ingressgateway with the selector <strong>istio: ingressgateway</strong> to accept HTTP traffic on port 80 if SNI host matches the host in the list.</p>
+
+<p>Few things to keep in mind:</p>
+
+<ul>
+<li>the selector is used by istio to select the ingressgateway. Keep this in mind if you have multiple ingressgateways</li>
+<li>Better to <a href="https://github.com/istio/istio/issues/11509">avoid</a> using *<strong>.domain</strong> in hosts, unless you have only a single gateway.</li>
+<li>port naming is important, it is used in some routing logic <a href="https://istio.io/help/faq/traffic-management/">inside the istio</a>.</li>
+</ul>
+
+<blockquote>
+<p>The port names must be of the form <code>protocol</code>-<code>suffix</code> with <code>grpc</code>, <code>http</code>, <code>http2</code>, <code>https</code>, <code>mongo</code>, <code>redis</code>, <code>tcp</code>, <code>tls</code> or <code>udp</code> as the <code>protocol</code> in order to take advantage of Istio’s routing features.</p>
+
+<p>For example, <code>name: http2-foo</code> or <code>name: http</code> are valid port names, but <code>name: http2foo</code> is not. If the port name does not begin with a recognized prefix or if the port is unnamed, traffic on the port will be treated as plain TCP traffic (unless the port explicitly uses Protocol: UDP to signify a UDP port).</p>
+</blockquote>
+
+<p>Next, we need to create a VirtualService for each of the services we want to expose.
+Here is a one for the Grafana:</p>
+
+<pre><code>apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: grafana
+spec:
+  hosts:
+    - grafana.example.com
+  gateways:
+    - service-gw.default
+  http:
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            port:
+              number: 3000
+            host: grafana
+</code></pre>
+
+<p>Things to keep in mind here:</p>
+
+<ul>
+<li>If VirtualService and Gateway are located in the different namespaces, make sure to set gateway in the format of <strong>gateway-name.namespace,</strong> otherwise, you’ll be getting 404.</li>
+</ul>
+
+<h2 id="istio-and-https">Istio and HTTPS</h2>
+
+<p>Exposing services to the world is cool, basics are working. But in 2019 everything should be exposed using HTTPS.
+With Istio exposing site using HTTPS is in fact much more complicated and limited comparably with other ingresses.
+Let’s start with exposing our service using HTTPS and then I’ll list all the issues and limitations I faced with possible workarounds.</p>
+
+<p>To update our gateway to listen to HTTPS traffic we need to have a valid certificate. I’m a big fan of <a href="https://letsencrypt.org/">LetsEncrypt</a> and <a href="https://github.com/jetstack/cert-manager">cert-manager</a>, so I’m going to use it here.
+You can install cert-manager as part of istio chart or you can use a dedicated chart for that. I already have cert-manager installed, so I will just add another certificate to the cluster.</p>
+
+<pre><code>apiVersion: certmanager.k8s.io/v1alpha1
+kind: Certificate
+metadata:
+  name: example-com
+spec:
+  secretName: example-com-certs
+  issuerRef:
+    name: letsencrypt-live
+    kind: ClusterIssuer
+  commonName: '*.example.com'
+  dnsNames:
+  - example.com
+  acme:
+    config:
+    - dns01:
+        provider: cloudflare-dns01
+      domains:
+      - '*.example.com'
+      - example.com
+</code></pre>
+
+<p>Next step is to add this certificate to the igressgateway deployment.</p>
+
+<pre><code>istio-ingressgateway:
+  secretVolumes:
+    ...
+    - name: example-com-certs
+      secretName: example-com-certs
+      mountPath: /etc/istio/example-com-certs
+    ...
+</code></pre>
+
+<p>Now, we can update our gateway configuration to use HTTPS:</p>
+
+<pre><code>apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: service-gw
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 443
+        name: https-system
+        protocol: HTTPS
+      hosts:
+      - &quot;grafana.example.com&quot;
+      - &quot;kiali.example.com&quot;
+      - &quot;prometheus.example.com&quot;
+      - &quot;jaeger.example.com&quot;
+      tls:
+        mode: SIMPLE
+        privateKey: /etc/istio/example-com-certs/tls.key
+        serverCertificate: /etc/istio/example-com-certs/tls.crt
+</code></pre>
+
+<p>If everything went well, we can now access <a href="https://grafana.com/">Grafana</a> using HTTPS with a valid certificate from the <a href="https://letsencrypt.org/">LetsEncrypt</a>.</p>
+
+<h2 id="issues">Issues</h2>
+
+<p>Now, let’s talk about the issues I have encountered during that short period of time I spent working with istio.</p>
+
+<ul>
+<li>[FIXED in 1.1] Manual update of the certificates. This is probably the most annoying thing. Having to update the deployment for each certificate, and restart ingressgateway to pick up it is not cool. This was finally fixed in 1.1 release. It is now possible to tell istio to use Kubernetes secret. <a href="https://istio.io/docs/tasks/traffic-management/secure-ingress/sds/">Detailed how-to is here</a>.</li>
+</ul>
+
+<p><a href="https://github.com/istio/istio/issues/9030">https://github.com/istio/istio/issues/9030</a></p>
+
+<p><a href="https://github.com/istio/istio/pull/11496">https://github.com/istio/istio/pull/11496</a></p>
+
+<ul>
+<li>[FIXED in 1.1] Another issue popped up when I tried to use the same port 443 for both PASSTHROUGH mode and SSL-termination, which is a perfectly reasonable scenario.<br /></li>
+</ul>
+
+<p><a href="https://discuss.istio.io/t/tls-modes-passthrough-and-simple/852">https://discuss.istio.io/t/tls-modes-passthrough-and-simple/852</a></p>
+
+<p><a href="https://github.com/istio/istio/issues/11509">https://github.com/istio/istio/issues/11509</a></p>
+
+<ul>
+<li>[FIXED in <a href="https://github.com/kiali/kiali/releases/tag/v0.16.2">Kiali v0.16.2</a>] I spent some time trying to figure out the correct way of specifying Gateway in the VirtualService. At some point, I thought that you can’t have Gateway and VirtualService in different namespaces. What made it even more confusing is <a href="https://www.kiali.io/">Kiali</a>. Whenever I tried to point VirtualService to the gateway in the different namespace I saw a validation error “virtualservice is pointing to non-existing gateway”
+<figure>
+    <img src="../../img/2019/04/kiali-error.png"
+         alt="kiali: virtualservice is pointing to non-existing gateway"/> 
+</figure>
+</li>
+</ul>
+
+<p>This issue is fixed in the <a href="https://github.com/kiali/kiali/releases/tag/v0.16.2">Kiali v0.16.2</a>, which is not yet updated in istio chart.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Istio is still a very young project. Reaching the 1.0 version was a huge step, but it still requires a lot of work. I only touched the ingress part of it and found that it lacks some of the basic functionality that one would expect from the Ingress controller.<br />
+On the other hand, it is in a very active development phase. All the issues that I had in 1.0.* version was addressed and fixed in 1.1.0 release.
+Another nice piece of software that comes with the Istio is Kiali, it looks really great and it should be very useful when I start using istio as a service mesh, not just an ingress.</p>
+
+    </div>
+
+    <div>
+        <hr/>
+        <b>Like this post?</b> Want more? <a href="http://eepurl.com/cdUha1"><b><u>Subscribe</u></b></a> to get updates delivered straight to your inbox.
+        <hr/>
+    </div>
+    <footer>
+        <ul class="stats">
+    
+        
+
+        
+        
+            <li>
+                
+                
+                    
+
+                    
+                    
+
+                    
+
+                    
+                        Categories
+                    
+                
+            </li>
+        
+    
+
+    
+    
+        <li><a href='../../categories/kubernetes'>kubernetes</a></li>
+    
+        <li><a href='../../categories/k8s'>k8s</a></li>
+    
+        <li><a href='../../categories/service-mesh'>service-mesh</a></li>
+    
+        <li><a href='../../categories/istio'>istio</a></li>
+    
+        <li><a href='../../categories/ingress'>ingress</a></li>
+    
+</ul>
+
+    </footer>
+</article>
+<ul class="actions pagination">
+    
+        <li><a href="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/"
+                class="button big previous">How to deploy multi-arch Kubernetes cluster using Kubespray</a></li>
+    
+
+    
+        <li><a href="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/"
+                class="button big next">Agola - One CI To Run Them All</a></li>
+    
+</ul>
+
+
+
+    
+        <article class="post">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "blog-lwolf" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </article>
+    
+
+
+    </div>
+    
+<section id="sidebar">
+
+    
+        <section id="intro">
+            
+            
+                
+                    <a href="../../" class="logo"><img src="../../img/author.jpg" alt="Hugo Future Imperfect" /></a>
+                
+            
+            
+                <header>
+                    <h2>LWOLFS BLOG</h2>
+                    <p>Blog about dev and ops stuff, mostly cloud-native, containers, kubernetes, CI/CD, etc</p>
+                </header>
+            
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/lwolf" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/sergey-nuzhdin-9925b31a" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//facebook.com/snuzhdin" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+<li><a href="//twitter.com/SergeyNuzhdin" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+<li><a href="mailto:ipaq.lw@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+        </section>
+
+    
+        <section id="recent-posts">
+            <ul class="posts">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/">Agola - One CI To Run Them All</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2020-01-30'>
+                                    January 30, 2020</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/">Switching to Istio as the primary ingress</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-04-08'>
+                                    April 8, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/">How to deploy multi-arch Kubernetes cluster using Kubespray</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-02-02'>
+                                    February 2, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/home-lab-infrastructure-overview/">Home Lab Infrastructure Overview</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-01-23'>
+                                    January 23, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/going-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry/">Going open-source in monitoring, part V: Collecting errors from production using Sentry</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-09-06'>
+                                    September 6, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+
+                
+                    <li>
+                        <ul class="actions">
+                            <li><a href=
+                            
+                                /post/
+                            
+                            class="button">View more posts</a></li>
+                        </ul>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+    
+    
+    
+        <section id="categories">
+            <ul class="posts">
+                <header>
+                    <h3><a href="../../categories/">Categories</a></h3>
+                </header>
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/docker/">docker</a>
+                                <span style="float:right;">24</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/kubernetes/">kubernetes</a>
+                                <span style="float:right;">24</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/infrastructure/">infrastructure</a>
+                                <span style="float:right;">23</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/k8s/">k8s</a>
+                                <span style="float:right;">16</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/devops/">devops</a>
+                                <span style="float:right;">12</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ci/cd/">ci/cd</a>
+                                <span style="float:right;">8</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/gitlab/">gitlab</a>
+                                <span style="float:right;">8</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/monitoring/">monitoring</a>
+                                <span style="float:right;">5</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/prometheus/">prometheus</a>
+                                <span style="float:right;">4</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/coding/">coding</a>
+                                <span style="float:right;">3</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/architecture/">architecture</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/coreos/">coreos</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/glusterfs/">glusterfs</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/python/">python</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/storage/">storage</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/faas/">FaaS</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/python/">Python</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/code/">code</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/golang/">golang</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/high-availability/">high-availability</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ingress/">ingress</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/istio/">istio</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/k8s-api/">k8s-api</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/letsencrypt/">letsencrypt</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/minio/">minio</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/nginx/">nginx</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/postgresql/">postgresql</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/sentry/">sentry</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/serverless/">serverless</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/service-mesh/">service-mesh</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/sql/">sql</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ssl/">ssl</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+            </ul>
+        </section>
+    
+
+    
+        
+        <section class="blurb">
+            <h2>About</h2>
+            <p>Some about me text...</p>
+
+            <ul class="actions">
+                <li><a href="../../about/" class="button">Learn More</a></li>
+            </ul>
+        </section>
+        
+
+    
+        <section id="footer">
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/lwolf" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/sergey-nuzhdin-9925b31a" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//facebook.com/snuzhdin" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+<li><a href="//twitter.com/SergeyNuzhdin" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+<li><a href="mailto:ipaq.lw@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+
+            <p class="copyright">&copy; lwolfs blog. Design: <a href="http://html5up.net" target="_blank">HTML5 UP</a>. Ported by <a href="//github.com/jpescador" target="_blank">Julio Pescador</a>. Powered by <a href="//gohugo.io" target="_blank">Hugo</a></p>
+        </section>
+
+</section>
+
+            </div>
+        <a id="back-to-top" href="#" class="fa fa-arrow-up fa-border fa-2x"></a>
+        
+
+        
+        
+            
+        
+
+        
+        
+            <script src="../../js/jquery.min.js"></script>
+            <script src="../../js/skel.min.js"></script>
+            <script src="../../js/util.js"></script>
+            <script src="../../js/main.js"></script>
+            <script src="../../js/backToTop.js"></script>
+            <script src="../../js/highlight.pack.js"></script>
+        
+
+        
+
+            
+            <script>hljs.initHighlightingOnLoad();</script>
+            
+
+            
+            <script type="text/javascript" src="https://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-538070ba29aaa8d5"></script>
+
+    </body>
+</html>
+

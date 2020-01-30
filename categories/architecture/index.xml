@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>architecture on lwolfs blog</title>
+    <link>https://blog.lwolf.org/categories/architecture/</link>
+    <description>Recent content in architecture on lwolfs blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 23 Jan 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://blog.lwolf.org/categories/architecture/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Home Lab Infrastructure Overview</title>
+      <link>https://blog.lwolf.org/post/home-lab-infrastructure-overview/</link>
+      <pubDate>Wed, 23 Jan 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.lwolf.org/post/home-lab-infrastructure-overview/</guid>
+      <description>Home Lab Infrastructure Overview Every software or technology I blog about usually goes through my home lab first. A lot of people usually got surprised when they first hear that I have a multi-node Kubernetes cluster at home. It usually takes some time to tell them about all the machines and networking. Of course, not accounting for the time spent answering the question “why do you need it”. I added a few new devices and reconfigured everything from scratch recently.</description>
+    </item>
+    
+    <item>
+      <title>Bootstrapping CoreOS cluster with Kubernetes in 20 minutes using coreos-baremental and bootkube</title>
+      <link>https://blog.lwolf.org/post/bootstrapping-coreos-cluster-with-k8s-in-20-min-using-bootkube/</link>
+      <pubDate>Mon, 22 Aug 2016 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.lwolf.org/post/bootstrapping-coreos-cluster-with-k8s-in-20-min-using-bootkube/</guid>
+      <description>It&amp;rsquo;s 4 months now since I migrated my infrastructure to CoreOS and Kubernetes. Now I can say that this was the right decision. Or, even, the best thing that happened to my servers :).
+Of course, there were some problems during this period, but mostly because of some misconfiguration from my side. Also, there was no single downtime because of infrastructure.
+My original post was very long and compicated. Actually, even I don&amp;rsquo;t want to reproduce all of this stuff ever again.</description>
+    </item>
+    
+  </channel>
+</rss>

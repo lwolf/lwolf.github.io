@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>service-mesh on lwolfs blog</title>
+    <link>https://blog.lwolf.org/categories/service-mesh/</link>
+    <description>Recent content in service-mesh on lwolfs blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 08 Apr 2019 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="https://blog.lwolf.org/categories/service-mesh/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Switching to Istio as the primary ingress</title>
+      <link>https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/</link>
+      <pubDate>Mon, 08 Apr 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/</guid>
+      <description>I’ve been following the news about istio since it’s first alpha release in 2017. I think this project has a great future, because it solves a lot of pain points in the microservice based architecture, like auth, observability, fault-injection, etc.
+But the fact is, I never actually tried it. Prior to v1.0 there were too many bugs and limitations to put it into production. So, when they finally released “production-ready” version I got quite exciting.</description>
+    </item>
+    
+  </channel>
+</rss>

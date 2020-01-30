@@ -1,0 +1,1282 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        
+            
+                <title>How to deploy multi-arch Kubernetes cluster using Kubespray</title>
+            
+        
+
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content="Hugo 0.54.0" />
+        
+    <link rel="icon" href='../../favicon/favicon.png'>
+    
+    <meta name="msapplication-TileColor" content="#da532c">
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+
+
+        
+            <meta name="author" content="Sergey Nuzhdin">
+        
+        
+            
+                <meta name="description" content="Blog about python, docker, ci/cd, kubernetes and similar stuff,">
+            
+        
+
+        <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.lwolf.org/img/2019/02/kubespray-logo.png"/>
+
+<meta name="twitter:title" content="How to deploy multi-arch Kubernetes cluster using Kubespray"/>
+<meta name="twitter:description" content="How to deploy multi-arch Kubernetes cluster using Kubespray I recently bought 3 ODROID-HC1 devices to add a dedicated storage cluster to my home Kubernetes. I thought that it’s a good excuse to spend some time redeploying the cluster. Usually, I would’ve gone with CoreOS, since I’m a big fan of their immutable OS. Unfortunately, that is not an option if you have ARM nodes. So I had to choose between manual provisioning and Ansible."/>
+<meta name="twitter:site" content="@SergeyNuzhdin"/>
+
+        <meta property="og:title" content="How to deploy multi-arch Kubernetes cluster using Kubespray" />
+<meta property="og:description" content="How to deploy multi-arch Kubernetes cluster using Kubespray I recently bought 3 ODROID-HC1 devices to add a dedicated storage cluster to my home Kubernetes. I thought that it’s a good excuse to spend some time redeploying the cluster. Usually, I would’ve gone with CoreOS, since I’m a big fan of their immutable OS. Unfortunately, that is not an option if you have ARM nodes. So I had to choose between manual provisioning and Ansible." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/" />
+
+<meta property="og:image" content="https://blog.lwolf.org/img/2019/02/kubespray-logo.png" />
+<meta property="article:published_time" content="2019-02-02T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2019-02-02T00:00:00&#43;00:00"/>
+
+        
+<meta itemprop="name" content="How to deploy multi-arch Kubernetes cluster using Kubespray">
+<meta itemprop="description" content="How to deploy multi-arch Kubernetes cluster using Kubespray I recently bought 3 ODROID-HC1 devices to add a dedicated storage cluster to my home Kubernetes. I thought that it’s a good excuse to spend some time redeploying the cluster. Usually, I would’ve gone with CoreOS, since I’m a big fan of their immutable OS. Unfortunately, that is not an option if you have ARM nodes. So I had to choose between manual provisioning and Ansible.">
+
+
+<meta itemprop="datePublished" content="2019-02-02T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2019-02-02T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1441">
+
+  <meta itemprop="image" content="https://blog.lwolf.org/img/2019/02/kubespray-logo.png">
+
+
+
+<meta itemprop="keywords" content="" />
+
+        
+
+        
+
+        
+        
+            
+        
+
+        
+        
+            <link rel="stylesheet" href="../../css/google-font.css" />
+            <link rel="stylesheet" href="../../css/font-awesome.min.css" />
+            <link rel="stylesheet" href="../../css/main.css" />
+            <link rel="stylesheet" href="../../css/add-on.css" />
+            <link rel="stylesheet" href="../../css/monokai-sublime.css">
+        
+
+        
+
+        
+        
+        
+            
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-47060494-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+        
+    </head>
+    <body>
+
+        
+        <div id="wrapper">
+
+    
+    
+<header id="header">
+    
+        <h2><a href="../../">lwolfs blog</i></a></h2>
+    
+
+    <nav class="links">
+        <ul>
+            
+                <li>
+                    <a href="../../post">
+                        
+                            <i class="fa fa-newspaper-o">&nbsp;</i>Posts
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="../../categories">
+                        Categories
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="../../about">
+                        About
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="http://eepurl.com/cdUha1">
+                        Subscribe
+                    </a>
+                </li>
+            
+        </ul>
+    </nav>
+    <nav class="main">
+        <ul>
+            
+            <li id="share-nav" class="share-menu" style="display:none;">
+                <a class="fa-share-alt" href="#share-menu">Share</a>
+            </li>
+            
+            <li class="search">
+                <a class="fa-search" href="#search">Search</a>
+                <form id="search" method="get" action="//google.com/search">
+                    <input type="text" name="q" placeholder="Search" />
+                    <input type="hidden" name="q" value="site:https://blog.lwolf.org">
+                </form>
+            </li>
+            <li class="menu">
+                <a class="fa-bars" href="#menu">Menu</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+
+<section id="menu">
+
+    
+        <section>
+            <form class="search" method="get" action="//google.com/search">
+                <input type="text" name="q" placeholder="Search" />
+                <input type="hidden" name="q" value="site:https://blog.lwolf.org">
+            </form>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                
+                    <li>
+                        <a href="../../post">
+                            <h3>
+                                
+                                    <i class="fa fa-newspaper-o">&nbsp;</i>
+                                
+                                Posts
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="../../categories">
+                            <h3>
+                                
+                                Categories
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="../../about">
+                            <h3>
+                                
+                                About
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="http://eepurl.com/cdUha1">
+                            <h3>
+                                
+                                Subscribe
+                            </h3>
+                        </a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/"><p>Agola - One CI To Run Them All</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/"><p>Switching to Istio as the primary ingress</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/"><p>How to deploy multi-arch Kubernetes cluster using Kubespray</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/home-lab-infrastructure-overview/"><p>Home Lab Infrastructure Overview</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/going-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry/"><p>Going open-source in monitoring, part V: Collecting errors from production using Sentry</p></a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        
+</section>
+
+    <section id="share-menu">
+    <section id="social-share-nav">
+        <ul class="links">
+            <header>
+                <h3>Share this post <i class="fa fa-smile-o"></i></h3>
+            </header>
+            
+
+
+<li><a href="//twitter.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f&text=How%20to%20deploy%20multi-arch%20Kubernetes%20cluster%20using%20Kubespray&via=SergeyNuzhdin" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f&title=How%20to%20deploy%20multi-arch%20Kubernetes%20cluster%20using%20Kubespray" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f&title=How%20to%20deploy%20multi-arch%20Kubernetes%20cluster%20using%20Kubespray" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f&title=How%20to%20deploy%20multi-arch%20Kubernetes%20cluster%20using%20Kubespray" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Sergey%20Nuzhdin&body=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+</section>
+
+    
+    <div id="main">
+        
+        
+        <article class="post">
+    <header>
+    <div class="title">
+        
+            <h1><a href="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/">How to deploy multi-arch Kubernetes cluster using Kubespray</a></h1>
+            
+        
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2019-02-02'>
+            February 2, 2019</time>
+        <span class="author">Sergey Nuzhdin</span>
+        
+            <p>7 minute read</p>
+        
+        
+    </div>
+</header>
+
+
+    <section id="social-share">
+        <ul class="icons">
+            
+
+
+<li><a href="//twitter.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f&text=How%20to%20deploy%20multi-arch%20Kubernetes%20cluster%20using%20Kubespray&via=SergeyNuzhdin" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f&title=How%20to%20deploy%20multi-arch%20Kubernetes%20cluster%20using%20Kubespray" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f&title=How%20to%20deploy%20multi-arch%20Kubernetes%20cluster%20using%20Kubespray" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f&title=How%20to%20deploy%20multi-arch%20Kubernetes%20cluster%20using%20Kubespray" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Sergey%20Nuzhdin&body=https%3a%2f%2fblog.lwolf.org%2fpost%2fhow-to-deploy-multi-arch-kubernetes-cluster-using-kubespray%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+    
+    
+
+    
+        
+        
+
+
+
+
+    
+    
+        
+    
+
+
+        
+
+        <a href="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/" class="image featured">
+            <img src="../../img/2019/02/kubespray-logo.png" alt="" />
+        </a>
+    
+
+
+    <div id="content">
+        
+
+<h1 id="how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray">How to deploy multi-arch Kubernetes cluster using Kubespray</h1>
+
+<p>I recently bought 3 <a href="https://www.hardkernel.com/shop/odroid-hc1-home-cloud-one/">ODROID-HC1</a> devices to add a dedicated storage cluster to my home Kubernetes. I thought that it’s a good excuse to spend some time redeploying the cluster. Usually, I would’ve gone with CoreOS, since I’m a big fan of their immutable OS. Unfortunately, that is not an option if you have ARM nodes. So I had to choose between manual provisioning and Ansible. I chose Ansible.</p>
+
+<p>I knew about <a href="https://github.com/kubernetes-incubator/kubespray">Kubespray</a>, but still, I decided to spend some time looking for alternatives. I found a few other projects: some targeted towards ARMs, some with a “simplified” approach. In the end, I decided to go with Kubespray. Partly, because it is a part of official k8s tooling, partly because they started to use kubeadm under the hood.</p>
+
+<p>Kubespray is the oldest project aimed to automate Kubernetes cluster provisioning. There are a lot of good manuals on how to deploy a simple k8s cluster using Kubespray, like <a href="https://dzone.com/articles/kubespray-10-simple-steps-for-installing-a-product">this</a> or <a href="https://medium.com/@iamalokpatra/deploy-a-kubernetes-cluster-using-kubespray-9b1287c740ab">this</a>.
+So, I’m not going to repeat any of this here. Instead, I&rsquo;ll try to highlight the steps required to make things work in a multi-arch cluster.</p>
+
+<h2 id="multi-arch-deployment">Multi-arch deployment</h2>
+
+<p>Kubernetes’s support for non-amd64 platforms improved dramatically during the last 2 years. Thanks to the popularity of cheap ARM boards like RaspberryPi and the community. Kubespray does not yet work with multi-arch setup out of the box, but it&rsquo;s getting there with every release.
+As it turned out it’s not very difficult to make it work.
+In general, the work could be split into a few categories:</p>
+
+<ul>
+<li>change some Kubespray configs where architecture is still hardcoded.</li>
+<li>choose overlay network that works with different architectures and setup it</li>
+<li>configures arch-specific software to be scheduled to corresponding nodes using <strong>nodeSelector</strong></li>
+</ul>
+
+<h2 id="fine-tuning-settings">Fine-tuning settings</h2>
+
+<p>When I started experimenting with Kubespray and multi-arch deployment, around 2 months ago, I had to change a lot of files. Lots of URLs for binaries and docker images had a hardcoded amd64 part. Luckily, at the moment of writing only a few such places left in the repo.</p>
+
+<ol>
+<li>One of such hardcoded arch is still present in the latest 2.8 release, but it&rsquo;s already fixed in master. So we need to change it.</li>
+</ol>
+
+<pre><code>    - hyperkube_download_url: &quot;https://storage.googleapis.com/.../linux/amd64/hyperkube&quot;
+    + hyperkube_download_url: &quot;https://storage.googleapis.com/.../linux/{{ image_arch }}/hyperkube&quot;
+    - etcd_download_url: &quot;https://github.com/coreos/.../etcd-{{ etcd_version }}-linux-amd64.tar.gz&quot;
+    + etcd_download_url: &quot;https://github.com/coreos/.../etcd-{{ etcd_version }}-linux-{{ image_arch }}.tar.gz&quot;
+</code></pre>
+
+<p>Previously I had to do such changes all over the place.</p>
+
+<ol>
+<li>Another thing that you have to deal with is the current implementation of checksums map. Kubespray was not meant to run in a hybrid environment, so it assumes that a binary could only have a single checksum. That is not a case in a multi-arch environment, where you have one binary per architecture.</li>
+<li>It might change in the future. For example, a simple map could be replaced with some sort of multileveled map. But for now, the easiest way is to comment out sha256 checksums for the binaries you’re gonna use.</li>
+</ol>
+
+<pre><code>    # roles/download/defaults/main.yaml
+      kubeadm:
+        enabled: &quot;{{ kubeadm_enabled }}&quot;
+        file: true
+        version: &quot;{{ kubeadm_version }}&quot;
+        dest: &quot;{{local_release_dir}}/kubeadm&quot;
+    #    sha256: &quot;{{ kubeadm_binary_checksum }}&quot;
+        url: &quot;{{ kubeadm_download_url }}&quot;
+        unarchive: false
+        owner: &quot;root&quot;
+        mode: &quot;0755&quot;
+        groups:
+          - k8s-cluster
+</code></pre>
+
+<ol>
+<li>The last thing left in this section is to extend the architecture group with ARM variable.</li>
+</ol>
+
+<pre><code>    # roles/kubernetes/preinstall/tasks/0040-set_facts.yml
+    - set_fact:
+        architecture_groups:
+          x86_64: amd64
+          aarch64: arm64
+          armv7l: arm
+</code></pre>
+
+<h2 id="overlay-network">Overlay network</h2>
+
+<p>The main choice one has to make is what overlay network to use.
+Here are the main options I considered:</p>
+
+<ul>
+<li><strong><em>cilium</em></strong> was my first choice. I heard a lot of great stuff about it and for a long time, I want to try it on a real system. Unfortunately, it <a href="https://github.com/cilium/cilium/issues/1104">does not support ARM yet</a>.</li>
+<li><strong>calico</strong> -  is another popular solution which I didn’t try yet. But, again, as far as I can tell, it still does not support multi-arch containers, but they are <a href="https://github.com/projectcalico/calico/issues/1865">working on it</a>. [<strong>UPDATE</strong>: the ticket is closed now, and you can use it on amd64/arm64 and ppc64 architectures.]</li>
+<li><strong><em>flannel</em></strong>  - I’ve been using flannel in most of my k8s clusters for a few years now and it turned out that I’m gonna use it for a much longer period. It is the only CNI that supports all the architectures. Well, maybe not all, but all architectures that I would ever need.</li>
+</ul>
+
+<h2 id="flannel">Flannel</h2>
+
+<p>Deploying flannel is very straight-forward. Flannel does not yet support multi-arch containers. You need to add a DaemonSet for each architecture you use and limit the nodes using NodeSelector. For example, to make it work on ARM64, all you need to do is copy original manifest and update a few lines.</p>
+
+<pre><code>    apiVersion: extensions/v1beta1
+    kind: DaemonSet
+    metadata:
+      name: kube-flannel-ds-arm64
+      namespace: kube-system
+      ...
+    spec:
+      template:
+        spec:
+          ...
+          nodeSelector:
+            beta.kubernetes.io/os: linux
+            beta.kubernetes.io/arch: arm64
+          ...
+          containers:
+          - name: kube-flannel
+            image: {{ flannel_image_repo }}:{{ flannel_image_tag }}-arm64
+</code></pre>
+
+<p>When I added all the changes for the flannel and tried to provision, playbook kept failing with the following error.</p>
+
+<pre><code>    TASK [kubernetes/secrets : Gen_certs | add CA to trusted CA dir] ********************************************************************************************************************
+    Saturday 29 September 2018  11:23:52 +0100 (0:00:00.536)       0:09:27.463 ****
+    changed: [node1] =&gt; {&quot;changed&quot;: true, &quot;checksum&quot;: &quot;6133a4cde211b2699082947ed5877627fc17a5fb&quot;, &quot;dest&quot;: &quot;/usr/local/share/ca-certificates/kube-ca.crt&quot;, &quot;gid&quot;: 0, &quot;group&quot;: &quot;root&quot;, &quot;md5sum&quot;: &quot;538b74ed3d841c835d026dd51de99882&quot;, &quot;mode&quot;: &quot;0644&quot;, &quot;owner&quot;: &quot;root&quot;, &quot;size&quot;: 1094, &quot;src&quot;: &quot;/etc/kubernetes/ssl/ca.pem&quot;, &quot;state&quot;: &quot;file&quot;, &quot;uid&quot;: 0}
+    changed: [node2] =&gt; {&quot;changed&quot;: true, &quot;checksum&quot;: &quot;6133a4cde211b2699082947ed5877627fc17a5fb&quot;, &quot;dest&quot;: &quot;/usr/local/share/ca-certificates/kube-ca.crt&quot;, &quot;gid&quot;: 0, &quot;group&quot;: &quot;root&quot;, &quot;md5sum&quot;: &quot;538b74ed3d841c835d026dd51de99882&quot;, &quot;mode&quot;: &quot;0644&quot;, &quot;owner&quot;: &quot;root&quot;, &quot;size&quot;: 1094, &quot;src&quot;: &quot;/etc/kubernetes/ssl/ca.pem&quot;, &quot;state&quot;: &quot;file&quot;, &quot;uid&quot;: 0}
+    fatal: [odroid1]: FAILED! =&gt; {&quot;changed&quot;: false, &quot;msg&quot;: &quot;Source /etc/kubernetes/ssl/ca.pem not found&quot;}
+</code></pre>
+
+<p>Looking into failing step, it does not seem to be related to the networking. But in the logs of the several scheduled containers, it’s clear that the problem is in CNI plugins.</p>
+
+<pre><code>    Normal   Scheduled               48m                 default-scheduler  Successfully assigned cert-manager/cert-manager-695f7b5bdc-t28j7 to odroid1
+    Warning  FailedCreatePodSandBox  48m                 kubelet, odroid1   Failed create pod sandbox: rpc error: code = Unknown desc = [failed to set up sandbox container &quot;9c887728f495874b0b9efd444900f829283b26884bf23d4255193bdbd8139f4d&quot; network for pod &quot;cert-manager-695f7b5bdc-t28j7&quot;: NetworkPlugin cni failed to set up pod &quot;cert-manager-695f7b5bdc-t28j7_cert-manager&quot; network: failed to find plugin &quot;loopback&quot; in path [/opt/cni/bin], failed to clean up sandbox container &quot;9c887728f495874b0b9efd444900f829283b26884bf23d4255193bdbd8139f4d&quot; network for pod &quot;cert-manager-695f7b5bdc-t28j7&quot;: NetworkPlugin cni failed to teardown pod &quot;cert-manager-695f7b5bdc-t28j7_cert-manager&quot; network: failed to find plugin &quot;portmap&quot; in path [/opt/cni/bin]]
+    Normal   SandboxChanged          2m (x204 over 48m)  kubelet, odroid1   Pod sandbox changed, it will be killed and re-created.
+</code></pre>
+
+<p>After some googling, I found a few issues in the flannel repo mentioning missing plugins in the flannel 0.10. Especially the absence of the <a href="https://github.com/coreos/flannel/issues/890#issuecomment-349448629">portmap plugin</a>. The workaround for this is either downgrade to flannel 0.9.1 or install <a href="https://github.com/containernetworking/plugins">CNI plugins</a> manually. I decided to install the plugins using Ansible. After this, provisioning succeeded.</p>
+
+<h2 id="flannel-update">Flannel update</h2>
+
+<p>When you’re dealing with a multi-arch setup on daily basis at some point you&rsquo;ll get tired of gating deployments. I mean for each deployment you create, you need to add NodeSelector so it will be able to run.</p>
+
+<p>Docker&rsquo;s manifests are still not very popular, and only a few projects are using. As far as I know, only Docker and GKE registries support them.</p>
+
+<p>So I created a <a href="https://github.com/lwolf/docker-multiarch">repo on GitHub</a> with a bunch of dockerfiles and build steps to build manifest-based containers for the software I use. The build is automatic, it checks releases daily and runs build on new releases.
+Currently, I have flannel, flannel-cni, kubernetes-dashboard, Prometheus and helm.
+Thanks to the manifest-based flannel container, I removed my custom one-per-architecture flannel DaemonSet. Now I use an upstream version of it. So, instead of a bunch of DaemonSets, I need to replace a few CNI related variables:</p>
+
+<pre><code>    # roles/download/defaults/main.yaml
+    flannel_cni_version: &quot;v0.7.4&quot;
+    flannel_image_repo: &quot;lwolf/flannel&quot;
+    flannel_cni_image_repo: &quot;lwolf/flannel-cni&quot;
+</code></pre>
+
+<h2 id="upgrading-k8s-versions">Upgrading K8S versions</h2>
+
+<p>During the time have this setup, a few versions of Kubernetes were released. So I had a good chance to test upgrades between releases. I started with v1.12 and went through the upgrades up to v1.12.5. In general, everything went well, I didn’t have any problems with the core components. The only thing that was causing provision to fail from time to time was <a href="https://github.com/kubernetes/ingress-nginx">nginx-ingress-controller</a> provided by Kubespray. For some reason, Kubespray is trying to delete it and reinstall each time. I ended up disabling it and other charts.  I wasn’t planning on managing helm charts with Kubespray anyways. I find this workflow a bit strange: Ansible variables -&gt; jinja -&gt; helm templates -&gt; helm install.</p>
+
+<p>After this change, updates became stable.</p>
+
+<h2 id="conclusions">Conclusions</h2>
+
+<p>It’s great to see that Kubernetes is getting good support for a multi-arch setup. I am very pleased with the number of hacks that I had to do to Kubespray to make it work seamlessly in a hybrid cluster.</p>
+
+<p>I planned to cover the deployment of GlusterFS in this post as well since it was the reason for this whole deployment.</p>
+
+<p>But GlusterFS, as usual, caused a lot of trouble to deploy and deserves a separate post.</p>
+
+    </div>
+
+    <div>
+        <hr/>
+        <b>Like this post?</b> Want more? <a href="http://eepurl.com/cdUha1"><b><u>Subscribe</u></b></a> to get updates delivered straight to your inbox.
+        <hr/>
+    </div>
+    <footer>
+        <ul class="stats">
+    
+        
+
+        
+        
+            <li>
+                
+                
+                    
+
+                    
+                    
+
+                    
+
+                    
+                        Categories
+                    
+                
+            </li>
+        
+    
+
+    
+    
+        <li><a href='../../categories/docker'>docker</a></li>
+    
+        <li><a href='../../categories/infrastructure'>infrastructure</a></li>
+    
+        <li><a href='../../categories/kubernetes'>kubernetes</a></li>
+    
+        <li><a href='../../categories/k8s'>k8s</a></li>
+    
+        <li><a href='../../categories/devops'>devops</a></li>
+    
+</ul>
+
+    </footer>
+</article>
+<ul class="actions pagination">
+    
+        <li><a href="https://blog.lwolf.org/post/home-lab-infrastructure-overview/"
+                class="button big previous">Home Lab Infrastructure Overview</a></li>
+    
+
+    
+        <li><a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/"
+                class="button big next">Switching to Istio as the primary ingress</a></li>
+    
+</ul>
+
+
+
+    
+        <article class="post">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "blog-lwolf" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </article>
+    
+
+
+    </div>
+    
+<section id="sidebar">
+
+    
+        <section id="intro">
+            
+            
+                
+                    <a href="../../" class="logo"><img src="../../img/author.jpg" alt="Hugo Future Imperfect" /></a>
+                
+            
+            
+                <header>
+                    <h2>LWOLFS BLOG</h2>
+                    <p>Blog about dev and ops stuff, mostly cloud-native, containers, kubernetes, CI/CD, etc</p>
+                </header>
+            
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/lwolf" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/sergey-nuzhdin-9925b31a" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//facebook.com/snuzhdin" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+<li><a href="//twitter.com/SergeyNuzhdin" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+<li><a href="mailto:ipaq.lw@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+        </section>
+
+    
+        <section id="recent-posts">
+            <ul class="posts">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/">Agola - One CI To Run Them All</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2020-01-30'>
+                                    January 30, 2020</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/">Switching to Istio as the primary ingress</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-04-08'>
+                                    April 8, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/">How to deploy multi-arch Kubernetes cluster using Kubespray</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-02-02'>
+                                    February 2, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/home-lab-infrastructure-overview/">Home Lab Infrastructure Overview</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-01-23'>
+                                    January 23, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/going-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry/">Going open-source in monitoring, part V: Collecting errors from production using Sentry</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-09-06'>
+                                    September 6, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+
+                
+                    <li>
+                        <ul class="actions">
+                            <li><a href=
+                            
+                                /post/
+                            
+                            class="button">View more posts</a></li>
+                        </ul>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+    
+    
+    
+        <section id="categories">
+            <ul class="posts">
+                <header>
+                    <h3><a href="../../categories/">Categories</a></h3>
+                </header>
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/docker/">docker</a>
+                                <span style="float:right;">24</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/kubernetes/">kubernetes</a>
+                                <span style="float:right;">24</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/infrastructure/">infrastructure</a>
+                                <span style="float:right;">23</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/k8s/">k8s</a>
+                                <span style="float:right;">16</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/devops/">devops</a>
+                                <span style="float:right;">12</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ci/cd/">ci/cd</a>
+                                <span style="float:right;">8</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/gitlab/">gitlab</a>
+                                <span style="float:right;">8</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/monitoring/">monitoring</a>
+                                <span style="float:right;">5</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/prometheus/">prometheus</a>
+                                <span style="float:right;">4</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/coding/">coding</a>
+                                <span style="float:right;">3</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/architecture/">architecture</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/coreos/">coreos</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/glusterfs/">glusterfs</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/python/">python</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/storage/">storage</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/faas/">FaaS</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/python/">Python</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/code/">code</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/golang/">golang</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/high-availability/">high-availability</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ingress/">ingress</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/istio/">istio</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/k8s-api/">k8s-api</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/letsencrypt/">letsencrypt</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/minio/">minio</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/nginx/">nginx</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/postgresql/">postgresql</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/sentry/">sentry</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/serverless/">serverless</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/service-mesh/">service-mesh</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/sql/">sql</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ssl/">ssl</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+            </ul>
+        </section>
+    
+
+    
+        
+        <section class="blurb">
+            <h2>About</h2>
+            <p>Some about me text...</p>
+
+            <ul class="actions">
+                <li><a href="../../about/" class="button">Learn More</a></li>
+            </ul>
+        </section>
+        
+
+    
+        <section id="footer">
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/lwolf" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/sergey-nuzhdin-9925b31a" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//facebook.com/snuzhdin" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+<li><a href="//twitter.com/SergeyNuzhdin" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+<li><a href="mailto:ipaq.lw@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+
+            <p class="copyright">&copy; lwolfs blog. Design: <a href="http://html5up.net" target="_blank">HTML5 UP</a>. Ported by <a href="//github.com/jpescador" target="_blank">Julio Pescador</a>. Powered by <a href="//gohugo.io" target="_blank">Hugo</a></p>
+        </section>
+
+</section>
+
+            </div>
+        <a id="back-to-top" href="#" class="fa fa-arrow-up fa-border fa-2x"></a>
+        
+
+        
+        
+            
+        
+
+        
+        
+            <script src="../../js/jquery.min.js"></script>
+            <script src="../../js/skel.min.js"></script>
+            <script src="../../js/util.js"></script>
+            <script src="../../js/main.js"></script>
+            <script src="../../js/backToTop.js"></script>
+            <script src="../../js/highlight.pack.js"></script>
+        
+
+        
+
+            
+            <script>hljs.initHighlightingOnLoad();</script>
+            
+
+            
+            <script type="text/javascript" src="https://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-538070ba29aaa8d5"></script>
+
+    </body>
+</html>
+

@@ -1,0 +1,1288 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head>
+        
+            
+                <title>Agola - One CI To Run Them All</title>
+            
+        
+
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content="Hugo 0.54.0" />
+        
+    <link rel="icon" href='../../favicon/favicon.png'>
+    
+    <meta name="msapplication-TileColor" content="#da532c">
+    <link rel="apple-touch-icon" sizes="57x57" href="../../favicon/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="../../favicon/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="../../favicon/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="../../favicon/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="../../favicon/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="../../favicon/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="../../favicon/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="../../favicon/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../../favicon/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192"  href="../../favicon/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../../favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="../../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../../favicon/favicon-16x16.png">
+    <link rel="manifest" href="../../favicon/manifest.json">
+    <meta name="msapplication-TileImage" content="/favicon/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+
+
+        
+            <meta name="author" content="Sergey Nuzhdin">
+        
+        
+            <meta name="description" content="Getting started with Agola. Initial setup and integration with Github, Gitlab and Gitea.">
+        
+
+        <meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="https://blog.lwolf.org/img/2020/01/agola.png"/>
+
+<meta name="twitter:title" content="Agola - One CI To Run Them All"/>
+<meta name="twitter:description" content="Getting started with Agola. Initial setup and integration with Github, Gitlab and Gitea."/>
+<meta name="twitter:site" content="@SergeyNuzhdin"/>
+
+        <meta property="og:title" content="Agola - One CI To Run Them All" />
+<meta property="og:description" content="Getting started with Agola. Initial setup and integration with Github, Gitlab and Gitea." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/" />
+
+<meta property="og:image" content="https://blog.lwolf.org/img/2020/01/agola.png" />
+<meta property="article:published_time" content="2020-01-30T00:00:00&#43;00:00"/>
+<meta property="article:modified_time" content="2020-01-30T00:00:00&#43;00:00"/>
+
+        
+<meta itemprop="name" content="Agola - One CI To Run Them All">
+<meta itemprop="description" content="Getting started with Agola. Initial setup and integration with Github, Gitlab and Gitea.">
+
+
+<meta itemprop="datePublished" content="2020-01-30T00:00:00&#43;00:00" />
+<meta itemprop="dateModified" content="2020-01-30T00:00:00&#43;00:00" />
+<meta itemprop="wordCount" content="1118">
+
+  <meta itemprop="image" content="https://blog.lwolf.org/img/2020/01/agola.png">
+
+
+
+<meta itemprop="keywords" content="" />
+
+        
+
+        
+
+        
+        
+            
+        
+
+        
+        
+            <link rel="stylesheet" href="../../css/google-font.css" />
+            <link rel="stylesheet" href="../../css/font-awesome.min.css" />
+            <link rel="stylesheet" href="../../css/main.css" />
+            <link rel="stylesheet" href="../../css/add-on.css" />
+            <link rel="stylesheet" href="../../css/monokai-sublime.css">
+        
+
+        
+
+        
+        
+        
+            
+<script type="application/javascript">
+var doNotTrack = false;
+if (!doNotTrack) {
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-47060494-2', 'auto');
+	
+	ga('send', 'pageview');
+}
+</script>
+
+        
+    </head>
+    <body>
+
+        
+        <div id="wrapper">
+
+    
+    
+<header id="header">
+    
+        <h2><a href="../../">lwolfs blog</i></a></h2>
+    
+
+    <nav class="links">
+        <ul>
+            
+                <li>
+                    <a href="../../post">
+                        
+                            <i class="fa fa-newspaper-o">&nbsp;</i>Posts
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="../../categories">
+                        Categories
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="../../about">
+                        About
+                    </a>
+                </li>
+            
+                <li>
+                    <a href="http://eepurl.com/cdUha1">
+                        Subscribe
+                    </a>
+                </li>
+            
+        </ul>
+    </nav>
+    <nav class="main">
+        <ul>
+            
+            <li id="share-nav" class="share-menu" style="display:none;">
+                <a class="fa-share-alt" href="#share-menu">Share</a>
+            </li>
+            
+            <li class="search">
+                <a class="fa-search" href="#search">Search</a>
+                <form id="search" method="get" action="//google.com/search">
+                    <input type="text" name="q" placeholder="Search" />
+                    <input type="hidden" name="q" value="site:https://blog.lwolf.org">
+                </form>
+            </li>
+            <li class="menu">
+                <a class="fa-bars" href="#menu">Menu</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+
+<section id="menu">
+
+    
+        <section>
+            <form class="search" method="get" action="//google.com/search">
+                <input type="text" name="q" placeholder="Search" />
+                <input type="hidden" name="q" value="site:https://blog.lwolf.org">
+            </form>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                
+                    <li>
+                        <a href="../../post">
+                            <h3>
+                                
+                                    <i class="fa fa-newspaper-o">&nbsp;</i>
+                                
+                                Posts
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="../../categories">
+                            <h3>
+                                
+                                Categories
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="../../about">
+                            <h3>
+                                
+                                About
+                            </h3>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="http://eepurl.com/cdUha1">
+                            <h3>
+                                
+                                Subscribe
+                            </h3>
+                        </a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        <section>
+            <ul class="links">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/"><p>Agola - One CI To Run Them All</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/"><p>Switching to Istio as the primary ingress</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/"><p>How to deploy multi-arch Kubernetes cluster using Kubespray</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/home-lab-infrastructure-overview/"><p>Home Lab Infrastructure Overview</p></a>
+                    </li>
+                
+                    <li>
+                        <a href="https://blog.lwolf.org/post/going-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry/"><p>Going open-source in monitoring, part V: Collecting errors from production using Sentry</p></a>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+        
+</section>
+
+    <section id="share-menu">
+    <section id="social-share-nav">
+        <ul class="links">
+            <header>
+                <h3>Share this post <i class="fa fa-smile-o"></i></h3>
+            </header>
+            
+
+
+<li><a href="//twitter.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f&text=Agola%20-%20One%20CI%20To%20Run%20Them%20All&via=SergeyNuzhdin" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f&title=Agola%20-%20One%20CI%20To%20Run%20Them%20All" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f&title=Agola%20-%20One%20CI%20To%20Run%20Them%20All" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f&title=Agola%20-%20One%20CI%20To%20Run%20Them%20All" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Sergey%20Nuzhdin&body=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+</section>
+
+    
+    <div id="main">
+        
+        
+        <article class="post">
+    <header>
+    <div class="title">
+        
+            <h1><a href="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/">Agola - One CI To Run Them All</a></h1>
+            
+        
+        
+            <p>Getting started with Agola. Initial setup and integration with Github, Gitlab and Gitea.</p>
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2020-01-30'>
+            January 30, 2020</time>
+        <span class="author">Sergey Nuzhdin</span>
+        
+            <p>6 minute read</p>
+        
+        
+    </div>
+</header>
+
+
+    <section id="social-share">
+        <ul class="icons">
+            
+
+
+<li><a href="//twitter.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f&text=Agola%20-%20One%20CI%20To%20Run%20Them%20All&via=SergeyNuzhdin" target="_blank" class="share-btn twitter">
+    <i class="fa fa-twitter"></i>
+    <p>Twitter</p>
+</a></li>
+
+
+<li><a href="//plus.google.com/share?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f" target="_blank" class="share-btn google-plus">
+    <i class="fa fa-google-plus"></i>
+    <p>Google+</p>
+</a></li>
+
+
+<li><a href="//www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f" target="_blank" class="share-btn facebook">
+    <i class="fa fa-facebook"></i>
+    <p>Facebook</p>
+</a></li>
+
+
+<li><a href="//reddit.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f&title=Agola%20-%20One%20CI%20To%20Run%20Them%20All" target="_blank" class="share-btn reddit">
+    <i class="fa fa-reddit-alien"></i>
+    <p>Reddit</p>
+</a></li>
+
+
+<li><a href="//www.linkedin.com/shareArticle?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f&title=Agola%20-%20One%20CI%20To%20Run%20Them%20All" target="_blank" class="share-btn linkedin">
+    <i class="fa fa-linkedin"></i>
+    <p>LinkedIn</p>
+</a></li>
+
+
+<li><a href="//www.stumbleupon.com/submit?url=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f&title=Agola%20-%20One%20CI%20To%20Run%20Them%20All" target="_blank" class="share-btn stumbleupon">
+    <i class="fa fa-stumbleupon"></i>
+    <p>StumbleUpon</p>
+</a></li>
+
+
+<li><a href="mailto:?subject=Check out this post by Sergey%20Nuzhdin&body=https%3a%2f%2fblog.lwolf.org%2fpost%2fagola-one-ci-to-run-them-all%2f" target="_blank" class="share-btn email">
+    <i class="fa fa-envelope"></i>
+    <p>Email</p>
+</a></li>
+
+        </ul>
+    </section>
+    
+    
+
+    
+        
+        
+
+
+
+
+    
+    
+        
+    
+
+
+        
+
+        <a href="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/" class="image featured">
+            <img src="../../img/2020/01/agola.png" alt="" />
+        </a>
+    
+
+
+    <div id="content">
+        
+
+<p>I&rsquo;ve been looking for a good Continues Integration(CI) system for quite some time now.
+System, that could work with all the major repository providers and run on my hardware.
+The need for multi-provider support comes from the fact that my code is spread across:</p>
+
+<ul>
+<li>Github</li>
+<li>Gitlab, cloud and <a href="https://blog.lwolf.org/post/fully-automated-gitlab-installation-on-kubernetes-including-runner-and-registry/">self-hosted</a></li>
+<li>Gitea - I&rsquo;m currently replacing my self-hosted Gitlab with it. I find it much simpler and faster.</li>
+</ul>
+
+<p>This means I can neither have a single view of all my tests nor have a unified way of testing.
+Of course, one could pay for some cloud-based CI/CD system and solve the problem.
+In my case, it doesn&rsquo;t make any sense to pay for cloud solutions. I have more than enough computing power in my home-lab to run any CI. The code that I need to test is either open-source or for personal projects.
+There are OSS solutions out there that could do the work, but I didn&rsquo;t find a single one that could tick all my boxes:</p>
+
+<ul>
+<li><a href="https://gitlab.com/">Gitlab</a> supports integration with different external providers, but only on a paid plan</li>
+<li><a href="https://drone.io/">Drone</a> only works with the single integration at a time, so you need to run one instance per provider.</li>
+<li><a href="https://jenkins-x.io/">Jenkins</a> - not sure if it can, but I&rsquo;d rather not go this way.</li>
+</ul>
+
+<p>That&rsquo;s why I got excited when I&rsquo;ve found out about the release of <a href="https://agola.io/">Agola</a>.</p>
+
+<h2 id="overview">Overview</h2>
+
+<p>Agola is a new CI system developed by <a href="https://github.com/sgotti">@sgotti</a>, the guy who built <a href="https://blog.lwolf.org/post/how-to-deploy-ha-postgressql-cluster-on-kubernetes/">stolon</a> - cloud-native HA PostgreSQL manager. I like the approach he used building stolon. He took great software - PostgreSQL and made it cloud-native. Not by stockpiling a bunch of bash scripts and voodoo magic like others, but by writing proper code.</p>
+
+<p>Apart from the author, a few of the main selling points for me were:</p>
+
+<ul>
+<li><strong>Multiple git sources integrations</strong> - a single CI for all my repositories.</li>
+<li><strong>User direct runs</strong> - ability to run CI tests against your local code without committing it to the server.</li>
+<li><strong>Advanced workflows</strong> - like matrix builds, fan-in, fan-out, multi-arch.</li>
+<li><strong>Golang and OSS</strong>  - should be very resource-efficient and easy to contribute</li>
+</ul>
+
+<p>You can find a full list of features in this introductory <a href="https://sgotti.dev/post/agola-introduction/">blog post</a>.</p>
+
+<h2 id="installation">Installation</h2>
+
+<p>This is my second attempt trying to get it up and running. The first one happened a few weeks after the initial release - v0.1, and I couldn&rsquo;t make it work. I didn&rsquo;t have enough time to dig into details, so I decided to give it another try later,
+This time, with version 0.4, I managed to get it up and running and using it for a month now.</p>
+
+<p>Installation could be a bit tricky because information about it is split between the <a href="https://agola.io/tryit/">try-it</a> section and actual <a href="https://agola.io/doc/">Documentation</a>. If you, like me, never use those everything-in-one-container setups and skip the try-it section, you can spend a lot of time trying to figure out why your <a href="https://github.com/agola-io/agola/issues/72">login/register buttons do not work</a> and you can&rsquo;t log in.</p>
+
+<p>To get Agola up and running in a Kubernetes cluster, assuming you do not want to use <a href="https://github.com/agola-io/agola/tree/master/examples/kubernetes/simple">all-in-one demo container</a>, you need to:</p>
+
+<ol>
+<li>Deploy <a href="https://github.com/etcd-io/etcd">Etcd</a> if you don&rsquo;t have one already.</li>
+<li>Deploy <a href="https://github.com/helm/charts/tree/master/stable/minio">MinIO</a> or any other S3-compatible object storage.</li>
+<li>Deploy Agola from the example in the repo
+
+<ul>
+<li>apply RBAC rules from the repo - <a href="https://github.com/agola-io/agola/blob/master/examples/kubernetes/common/rbac.yml">https://github.com/agola-io/agola/blob/master/examples/kubernetes/common/rbac.yml</a></li>
+<li>deploy the actual manifests - <a href="https://github.com/agola-io/agola/tree/master/examples/kubernetes/distributed">https://github.com/agola-io/agola/tree/master/examples/kubernetes/distributed</a></li>
+</ul></li>
+</ol>
+
+<p>I&rsquo;m not going to cover how to install <code>etcd</code>, because it varies wildly based on how resilient the system should be, or where you&rsquo;re running it.</p>
+
+<h2 id="adding-providers">Adding Providers</h2>
+
+<p>After you&rsquo;ve managed to install the system, you need to add at least one repository provider. Otherwise, you&rsquo;ll get an empty page trying to login or register. Agola does not have it&rsquo;s own authentication mechanisms and relies on the providers. Which makes perfect sense, you need to connect at least one repository provider to use it anyways.</p>
+
+<p>The workflow of adding a repository provider is the same. You need to get ClientID and Client Secret and use Agola CLI to add it.
+Below are the steps needed to get those ClientID and Secret for different providers.</p>
+
+<h3 id="github">Github</h3>
+
+<p>On Github you need to go to <code>settings/applications</code> to add an OAuth application:</p>
+
+<figure>
+    <img src="../../img/2020/01/github-oauth.png"
+         alt="how to create oauth app in github"/> 
+</figure>
+
+
+<h3 id="gitlab">Gitlab</h3>
+
+<p>In Gitlab you need to open the <code>profile/applications</code> section. You can also configure the level of permissions you want to give to the new application.</p>
+
+<figure>
+    <img src="../../img/2020/01/gitlab-oauth.png"
+         alt="how to create oauth app in gitlab"/> 
+</figure>
+
+
+<h3 id="gitea">Gitea</h3>
+
+<p>To create a new application in Gitea, go to <code>/user/settings/applications</code> page.</p>
+
+<figure>
+    <img src="../../img/2020/01/gitea-oauth.png"
+         alt="how to create oauth app in gitea"/> 
+</figure>
+
+
+<p>Step by step guide on how to add oauth2 provider could be found in gitea <a href="https://docs.gitea.io/en-us/oauth2-provider/">documentation page</a></p>
+
+<h3 id="agola-side">Agola side</h3>
+
+<p>To add a new provider you need to <code>exec</code> to the agola&rsquo;s gateway pod and use Agola&rsquo;s CLI. You also need $ADMIN_TOKEN, which you set during the installation in the <a href="https://github.com/agola-io/agola/blob/master/examples/kubernetes/distributed/agola.yml#L88">configuration YAML</a></p>
+
+<pre><code class="language-bash">    kubectl exec -it agola-gateway-pod /bin/bash
+    # add gitea
+    root$ agola remotesource create \
+    --name gitea \
+    --type gitea \
+    --api-url https://gitea.yourdomain.com \
+    --auth-type oauth2 \
+    --clientid $GITEA_APP_CLIENTID \
+    --secret $GITEA_APP_CLIENTSECRET \
+    --token $ADMIN_TOKEN \
+    --skip-ssh-host-key-check
+    
+    # add github
+    kubectl exec -it agola-gateway-pod /bin/bash
+    root$ agola remotesource create \
+    --name github \
+    --type github \
+    --api-url https://api.github.com \
+    --auth-type oauth2 \
+    --clientid $GITHUB_APP_CLIENTID \
+    --secret $GITHUB_APP_CLIENTSECRET \
+    --token $ADMIN_TOKEN
+    
+    # add gitlab
+    kubectl exec -it agola-gateway-pod /bin/bash
+    root$ agola remotesource create \
+    --name gitlab \
+    --type gitlab \
+    --api-url https://gitlab.com \
+    --auth-type oauth2 \
+    --clientid $GITHUB_APP_CLIENTID \
+    --secret $GITHUB_APP_CLIENTSECRET \
+    --token $ADMIN_TOKEN
+</code></pre>
+
+<p>Now you can register and login using any of those providers in the web UI.</p>
+
+<h2 id="direct-runs">Direct runs</h2>
+
+<p><code>Direct runs</code> is a unique feature of the Agola and so far my favorite.
+<code>Direct runs</code> allow you to run the CI pipeline without pushing the code to the remote. So, you don&rsquo;t have to create tens of the commits to the repo labeled <code>testing the CI</code>.
+You can test your local code in the CI environment, using a simple command:</p>
+
+<pre><code class="language-bash">    agola --gateway-url=https://agola.yourhost.address --token=&lt;YOUR_TOKEN&gt; directrun start
+</code></pre>
+
+<p>You can create a token from the <code>user/settings</code> page in the Agola Web UI.
+Under the hood the <code>directrun start</code> command will commit everything into a temporary git branch and push it to an internal git repository, then it&rsquo;ll run build as if it were normal.</p>
+
+<h2 id="secrets-and-variables">Secrets and variables</h2>
+
+<p>Agola, like any other CI system, allows you to add secrets and variables to your jobs.
+It has some useful features, like group-&gt;project <strong>inheritance</strong> or dynamic <strong>per-branch</strong> secrets, but I&rsquo;d say the implementation is not very polished.
+For example, I find the way how secrets are currently implemented very inconvenient.
+The only way to create one is by using Agola CLI, which means you can&rsquo;t have these things under version control.</p>
+
+<h2 id="wrap-up">Wrap up</h2>
+
+<p>I only use it in a few of my projects now, but I plan to migrate all personal repositories to it.
+So far I like it a lot and I hope it&rsquo;ll get more traction among the community.</p>
+
+    </div>
+
+    <div>
+        <hr/>
+        <b>Like this post?</b> Want more? <a href="http://eepurl.com/cdUha1"><b><u>Subscribe</u></b></a> to get updates delivered straight to your inbox.
+        <hr/>
+    </div>
+    <footer>
+        <ul class="stats">
+    
+        
+
+        
+        
+            <li>
+                
+                
+                    
+
+                    
+                    
+
+                    
+
+                    
+                        Categories
+                    
+                
+            </li>
+        
+    
+
+    
+    
+        <li><a href='../../categories/kubernetes'>kubernetes</a></li>
+    
+        <li><a href='../../categories/devops'>devops</a></li>
+    
+        <li><a href='../../categories/ci/cd'>ci/cd</a></li>
+    
+</ul>
+
+    </footer>
+</article>
+<ul class="actions pagination">
+    
+        <li><a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/"
+                class="button big previous">Switching to Istio as the primary ingress</a></li>
+    
+
+    
+</ul>
+
+
+
+    
+        <article class="post">
+            <div id="disqus_thread"></div>
+<script type="application/javascript">
+    var disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "blog-lwolf" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        </article>
+    
+
+
+    </div>
+    
+<section id="sidebar">
+
+    
+        <section id="intro">
+            
+            
+                
+                    <a href="../../" class="logo"><img src="../../img/author.jpg" alt="Hugo Future Imperfect" /></a>
+                
+            
+            
+                <header>
+                    <h2>LWOLFS BLOG</h2>
+                    <p>Blog about dev and ops stuff, mostly cloud-native, containers, kubernetes, CI/CD, etc</p>
+                </header>
+            
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/lwolf" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/sergey-nuzhdin-9925b31a" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//facebook.com/snuzhdin" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+<li><a href="//twitter.com/SergeyNuzhdin" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+<li><a href="mailto:ipaq.lw@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+        </section>
+
+    
+        <section id="recent-posts">
+            <ul class="posts">
+                <header>
+                    <h3>Recent Posts</h3>
+                </header>
+                
+                    
+                
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/agola-one-ci-to-run-them-all/">Agola - One CI To Run Them All</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2020-01-30'>
+                                    January 30, 2020</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/switching_to_istio_as_the_primary_ingress/">Switching to Istio as the primary ingress</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-04-08'>
+                                    April 8, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/how-to-deploy-multi-arch-kubernetes-cluster-using-kubespray/">How to deploy multi-arch Kubernetes cluster using Kubespray</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-02-02'>
+                                    February 2, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/home-lab-infrastructure-overview/">Home Lab Infrastructure Overview</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2019-01-23'>
+                                    January 23, 2019</time>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <h3><a href="https://blog.lwolf.org/post/going-open-source-in-monitoring-part-v-collecting-errors-from-production-using-sentry/">Going open-source in monitoring, part V: Collecting errors from production using Sentry</a></h3>
+                                
+                                    
+                                
+                                <time class="published" datetime=
+                                    '2017-09-06'>
+                                    September 6, 2017</time>
+                            </header>
+                        </article>
+                    </li>
+                
+
+                
+                    <li>
+                        <ul class="actions">
+                            <li><a href=
+                            
+                                /post/
+                            
+                            class="button">View more posts</a></li>
+                        </ul>
+                    </li>
+                
+            </ul>
+        </section>
+
+    
+    
+    
+    
+        <section id="categories">
+            <ul class="posts">
+                <header>
+                    <h3><a href="../../categories/">Categories</a></h3>
+                </header>
+
+                
+                    
+                
+
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/docker/">docker</a>
+                                <span style="float:right;">24</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/kubernetes/">kubernetes</a>
+                                <span style="float:right;">24</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/infrastructure/">infrastructure</a>
+                                <span style="float:right;">23</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/k8s/">k8s</a>
+                                <span style="float:right;">16</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/devops/">devops</a>
+                                <span style="float:right;">12</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ci/cd/">ci/cd</a>
+                                <span style="float:right;">8</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/gitlab/">gitlab</a>
+                                <span style="float:right;">8</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/monitoring/">monitoring</a>
+                                <span style="float:right;">5</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/prometheus/">prometheus</a>
+                                <span style="float:right;">4</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/coding/">coding</a>
+                                <span style="float:right;">3</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/architecture/">architecture</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/coreos/">coreos</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/glusterfs/">glusterfs</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/python/">python</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/storage/">storage</a>
+                                <span style="float:right;">2</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/faas/">FaaS</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/python/">Python</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/code/">code</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/golang/">golang</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/high-availability/">high-availability</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ingress/">ingress</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/istio/">istio</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/k8s-api/">k8s-api</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/letsencrypt/">letsencrypt</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/minio/">minio</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/nginx/">nginx</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/postgresql/">postgresql</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/sentry/">sentry</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/serverless/">serverless</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/service-mesh/">service-mesh</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/sql/">sql</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/ssl/">ssl</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+            </ul>
+        </section>
+    
+
+    
+        
+        <section class="blurb">
+            <h2>About</h2>
+            <p>Some about me text...</p>
+
+            <ul class="actions">
+                <li><a href="../../about/" class="button">Learn More</a></li>
+            </ul>
+        </section>
+        
+
+    
+        <section id="footer">
+            <ul class="icons">
+                
+                
+                    
+<li><a href="//github.com/lwolf" target="_blank" title="GitHub" class="fa fa-github"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//linkedin.com/in/sergey-nuzhdin-9925b31a" target="_blank" title="LinkedIn" class="fa fa-linkedin"></a></li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li><a href="//facebook.com/snuzhdin" target="_blank" title="Facebook" class="fa fa-facebook"></a></li>
+
+
+
+<li><a href="//twitter.com/SergeyNuzhdin" target="_blank" title="Twitter" class="fa fa-twitter"></a></li>
+
+
+
+<li><a href="mailto:ipaq.lw@gmail.com" title="Email" class="fa fa-envelope"></a></li>
+
+
+                
+            </ul>
+
+            <p class="copyright">&copy; lwolfs blog. Design: <a href="http://html5up.net" target="_blank">HTML5 UP</a>. Ported by <a href="//github.com/jpescador" target="_blank">Julio Pescador</a>. Powered by <a href="//gohugo.io" target="_blank">Hugo</a></p>
+        </section>
+
+</section>
+
+            </div>
+        <a id="back-to-top" href="#" class="fa fa-arrow-up fa-border fa-2x"></a>
+        
+
+        
+        
+            
+        
+
+        
+        
+            <script src="../../js/jquery.min.js"></script>
+            <script src="../../js/skel.min.js"></script>
+            <script src="../../js/util.js"></script>
+            <script src="../../js/main.js"></script>
+            <script src="../../js/backToTop.js"></script>
+            <script src="../../js/highlight.pack.js"></script>
+        
+
+        
+
+            
+            <script>hljs.initHighlightingOnLoad();</script>
+            
+
+            
+            <script type="text/javascript" src="https://s7.addthis.com/js/300/addthis_widget.js#pubid=ra-538070ba29aaa8d5"></script>
+
+    </body>
+</html>
+
